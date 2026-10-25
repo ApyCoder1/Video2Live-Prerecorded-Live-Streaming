@@ -1,0 +1,1946 @@
+{% extends "streaming/base.html" %}
+
+
+{% block title %}
+    Streaming Sessions | Stream Studio
+{% endblock %}
+
+
+{% block page_title %}
+    Streaming Sessions
+{% endblock %}
+
+
+{% block page_subtitle %}
+    Manage your YouTube streaming sessions
+{% endblock %}
+
+
+{% block extra_css %}
+
+<style>
+
+    /* =========================================================
+       PAGE
+    ========================================================= */
+
+    .session-page {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+
+    /* =========================================================
+       HEADER
+    ========================================================= */
+
+    .session-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        margin-bottom: 23px;
+    }
+
+
+    .session-heading h2 {
+        margin: 0;
+        color: #0f172a;
+        font-size: 21px;
+        font-weight: 700;
+    }
+
+
+    .session-heading p {
+        margin: 5px 0 0;
+        color: #94a3b8;
+        font-size: 13px;
+    }
+
+
+    .create-session-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        height: 40px;
+        padding: 0 15px;
+        border-radius: 9px;
+        background: #111827;
+        color: #ffffff;
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        white-space: nowrap;
+        border: 0;
+    }
+
+
+    .create-session-btn:hover {
+        background: #1f2937;
+        color: #ffffff;
+    }
+
+
+    /* =========================================================
+       SUMMARY
+    ========================================================= */
+
+    .session-summary {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+        margin-bottom: 20px;
+    }
+
+
+    .summary-card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 13px;
+        padding: 14px;
+        display: flex;
+        align-items: center;
+        gap: 11px;
+    }
+
+
+    .summary-icon {
+        width: 41px;
+        height: 41px;
+        border-radius: 10px;
+        background: #f1f5f9;
+        color: #475569;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 17px;
+        flex-shrink: 0;
+    }
+
+
+    .summary-number {
+        color: #111827;
+        font-size: 18px;
+        font-weight: 700;
+        line-height: 1;
+    }
+
+
+    .summary-label {
+        color: #94a3b8;
+        font-size: 10px;
+        margin-top: 5px;
+    }
+
+
+    /* =========================================================
+       TOOLBAR
+    ========================================================= */
+
+    .session-toolbar {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 13px;
+        padding: 12px;
+        margin-bottom: 18px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+
+
+    .session-search {
+        position: relative;
+        flex: 1;
+        max-width: 400px;
+        min-width: 220px;
+    }
+
+
+    .session-search i {
+        position: absolute;
+        left: 13px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 12px;
+    }
+
+
+    .session-search input {
+        width: 100%;
+        height: 39px;
+        border: 1px solid #e2e8f0;
+        border-radius: 9px;
+        padding: 0 12px 0 36px;
+        color: #334155;
+        font-size: 11px;
+        outline: none;
+    }
+
+
+    .session-search input:focus {
+        border-color: #94a3b8;
+        box-shadow:
+            0 0 0 3px
+            rgba(148,163,184,0.12);
+    }
+
+
+    .session-filter {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+    }
+
+
+    .session-filter select {
+        height: 39px;
+        border: 1px solid #e2e8f0;
+        border-radius: 9px;
+        background: #ffffff;
+        color: #475569;
+        padding: 0 11px;
+        font-size: 11px;
+        outline: none;
+    }
+
+
+    /* =========================================================
+       SESSION GRID
+    ========================================================= */
+
+    .session-grid {
+        display: grid;
+        grid-template-columns:
+            repeat(
+                auto-fill,
+                minmax(350px, 1fr)
+            );
+        gap: 18px;
+    }
+
+
+    /* =========================================================
+       SESSION CARD
+    ========================================================= */
+
+    .session-card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 15px;
+        overflow: hidden;
+        transition:
+            transform 0.2s ease,
+            box-shadow 0.2s ease;
+    }
+
+
+    .session-card:hover {
+        transform: translateY(-2px);
+        box-shadow:
+            0 10px 25px
+            rgba(15,23,42,0.07);
+    }
+
+
+    /* =========================================================
+       SESSION TOP
+    ========================================================= */
+
+    .session-card-top {
+        padding: 15px 16px;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+
+    .session-title-area {
+        min-width: 0;
+        flex: 1;
+    }
+
+
+    .session-title {
+        color: #111827;
+        font-size: 14px;
+        font-weight: 700;
+        margin-bottom: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+
+    .session-id {
+        color: #94a3b8;
+        font-size: 9px;
+    }
+
+
+    /* =========================================================
+       STATUS
+    ========================================================= */
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 6px 9px;
+        border-radius: 20px;
+        font-size: 9px;
+        font-weight: 700;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+
+    .status-draft {
+        background: #fffbeb;
+        color: #b45309;
+    }
+
+
+    .status-queued {
+        background: #f5f3ff;
+        color: #6d28d9;
+    }
+
+
+    .status-starting {
+        background: #eff6ff;
+        color: #1d4ed8;
+    }
+
+
+    .status-live {
+        background: #ecfdf5;
+        color: #047857;
+    }
+
+
+    .status-stopping {
+        background: #fff7ed;
+        color: #c2410c;
+    }
+
+
+    .status-stopped {
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+
+    .status-failed {
+        background: #fef2f2;
+        color: #b91c1c;
+    }
+
+
+    /* =========================================================
+       SESSION BODY
+    ========================================================= */
+
+    .session-card-body {
+        padding: 15px 16px;
+    }
+
+
+    /* =========================================================
+       PLAYLIST
+    ========================================================= */
+
+    .session-playlist {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding: 10px;
+        border-radius: 9px;
+        background: #f8fafc;
+        margin-bottom: 13px;
+    }
+
+
+    .session-playlist-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        background: #ffffff;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+
+    .session-playlist-info {
+        min-width: 0;
+    }
+
+
+    .session-playlist-label {
+        color: #94a3b8;
+        font-size: 9px;
+        margin-bottom: 2px;
+    }
+
+
+    .session-playlist-name {
+        color: #334155;
+        font-size: 11px;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+
+    /* =========================================================
+       META
+    ========================================================= */
+
+    .session-meta-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-bottom: 14px;
+    }
+
+
+    .session-meta {
+        padding: 9px;
+        background: #f8fafc;
+        border-radius: 8px;
+    }
+
+
+    .session-meta-label {
+        color: #94a3b8;
+        font-size: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        margin-bottom: 3px;
+    }
+
+
+    .session-meta-value {
+        color: #475569;
+        font-size: 10px;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+
+    /* =========================================================
+       YOUTUBE
+    ========================================================= */
+
+    .youtube-info {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding: 10px;
+        border: 1px solid #fee2e2;
+        background: #fffafa;
+        border-radius: 9px;
+        margin-bottom: 14px;
+    }
+
+
+    .youtube-icon {
+        width: 35px;
+        height: 35px;
+        border-radius: 8px;
+        background: #fee2e2;
+        color: #dc2626;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+
+    .youtube-details {
+        min-width: 0;
+        flex: 1;
+    }
+
+
+    .youtube-label {
+        color: #94a3b8;
+        font-size: 8px;
+        margin-bottom: 2px;
+    }
+
+
+    .youtube-title {
+        color: #475569;
+        font-size: 10px;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+
+    .youtube-link {
+        color: #dc2626;
+        text-decoration: none;
+        font-size: 10px;
+        font-weight: 600;
+    }
+
+
+    .youtube-link:hover {
+        text-decoration: underline;
+    }
+
+
+    /* =========================================================
+       STREAM STATUS
+    ========================================================= */
+
+    .stream-progress {
+        margin-bottom: 14px;
+    }
+
+
+    .stream-progress-header {
+        display: flex;
+        justify-content: space-between;
+        color: #94a3b8;
+        font-size: 9px;
+        margin-bottom: 5px;
+    }
+
+
+    .stream-progress-bar {
+        height: 5px;
+        background: #e2e8f0;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+
+    .stream-progress-value {
+        height: 100%;
+        width: 100%;
+        background: #111827;
+        border-radius: 10px;
+    }
+
+
+    /* =========================================================
+       ERROR
+    ========================================================= */
+
+    .session-error {
+        padding: 10px;
+        border-radius: 9px;
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #991b1b;
+        font-size: 10px;
+        margin-bottom: 14px;
+    }
+
+
+    .session-error strong {
+        display: block;
+        margin-bottom: 3px;
+    }
+
+
+    /* =========================================================
+       FOOTER
+    ========================================================= */
+
+    .session-card-footer {
+        padding: 11px 16px;
+        border-top: 1px solid #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+
+    .session-created {
+        color: #94a3b8;
+        font-size: 9px;
+    }
+
+
+    .session-actions {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+
+    .session-action {
+        width: 31px;
+        height: 31px;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        background: #ffffff;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+
+    .session-action:hover {
+        background: #f8fafc;
+        color: #111827;
+    }
+
+
+    .session-action.start:hover {
+        background: #ecfdf5;
+        border-color: #a7f3d0;
+        color: #047857;
+    }
+
+
+    .session-action.stop:hover {
+        background: #fff7ed;
+        border-color: #fed7aa;
+        color: #ea580c;
+    }
+
+
+    /* =========================================================
+       EMPTY
+    ========================================================= */
+
+    .session-empty {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        padding: 70px 20px;
+        text-align: center;
+    }
+
+
+    .session-empty-icon {
+        width: 70px;
+        height: 70px;
+        border-radius: 18px;
+        background: #f1f5f9;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 17px;
+        font-size: 30px;
+    }
+
+
+    .session-empty h3 {
+        color: #334155;
+        font-size: 17px;
+        margin: 0 0 6px;
+    }
+
+
+    .session-empty p {
+        color: #94a3b8;
+        font-size: 12px;
+        margin: 0 0 18px;
+    }
+
+
+    /* =========================================================
+       MODAL
+    ========================================================= */
+
+    .modal-warning-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        background: #fff7ed;
+        color: #ea580c;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 15px;
+        font-size: 22px;
+    }
+
+
+    /* =========================================================
+       RESPONSIVE
+    ========================================================= */
+
+    @media (max-width: 1000px) {
+
+        .session-summary {
+            grid-template-columns: 1fr 1fr;
+        }
+
+    }
+
+
+    @media (max-width: 700px) {
+
+        .session-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+
+        .create-session-btn {
+            width: 100%;
+        }
+
+
+        .session-summary {
+            grid-template-columns: 1fr;
+        }
+
+
+        .session-toolbar {
+            align-items: stretch;
+        }
+
+
+        .session-search {
+            max-width: none;
+            width: 100%;
+        }
+
+
+        .session-filter {
+            width: 100%;
+        }
+
+
+        .session-filter select {
+            width: 100%;
+        }
+
+
+        .session-grid {
+            grid-template-columns: 1fr;
+        }
+
+    }
+
+</style>
+
+{% endblock %}
+
+
+
+{% block content %}
+
+<div class="session-page">
+
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <div class="session-header">
+
+        <div class="session-heading">
+
+            <h2>
+                Streaming Sessions
+            </h2>
+
+            <p>
+                Manage and monitor your YouTube RTMP streams.
+            </p>
+
+        </div>
+
+
+        <a
+            href="{% url 'streaming:session_create' %}"
+            class="create-session-btn"
+        >
+
+            <i class="bi bi-broadcast-pin"></i>
+
+            Create Streaming Session
+
+        </a>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         SUMMARY
+    ====================================================== -->
+
+    {% if sessions %}
+
+        <div class="session-summary">
+
+
+            <!-- TOTAL -->
+
+            <div class="summary-card">
+
+                <div class="summary-icon">
+                    <i class="bi bi-broadcast"></i>
+                </div>
+
+                <div>
+
+                    <div class="summary-number">
+                        {{ sessions|length }}
+                    </div>
+
+                    <div class="summary-label">
+                        Total Sessions
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- RUNNING -->
+
+            <div class="summary-card">
+
+                <div class="summary-icon">
+                    <i class="bi bi-play-circle"></i>
+                </div>
+
+                <div>
+
+                    <div class="summary-number">
+                        {{ running_sessions|default:"0" }}
+                    </div>
+
+                    <div class="summary-label">
+                        Live / Starting
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- SCHEDULED -->
+
+            <div class="summary-card">
+
+                <div class="summary-icon">
+                    <i class="bi bi-calendar-event"></i>
+                </div>
+
+                <div>
+
+                    <div class="summary-number">
+                        {{ scheduled_sessions|default:"0" }}
+                    </div>
+
+                    <div class="summary-label">
+                        Scheduled
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- FAILED -->
+
+            <div class="summary-card">
+
+                <div class="summary-icon">
+                    <i class="bi bi-exclamation-circle"></i>
+                </div>
+
+                <div>
+
+                    <div class="summary-number">
+                        {{ failed_sessions|default:"0" }}
+                    </div>
+
+                    <div class="summary-label">
+                        Failed
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- =================================================
+             TOOLBAR
+        ================================================== -->
+
+        <div class="session-toolbar">
+
+
+            <div class="session-search">
+
+                <i class="bi bi-search"></i>
+
+                <input
+                    type="text"
+                    id="sessionSearch"
+                    placeholder="Search streaming sessions..."
+                    autocomplete="off"
+                >
+
+            </div>
+
+
+            <div class="session-filter">
+
+                <select id="sessionStatusFilter">
+
+                    <option value="">
+                        All Status
+                    </option>
+
+                    <option value="draft">
+                        Draft
+                    </option>
+
+                    <option value="queued">
+                        Queued
+                    </option>
+
+                    <option value="starting">
+                        Starting
+                    </option>
+
+                    <option value="live">
+                        Live
+                    </option>
+
+                    <option value="stopping">
+                        Stopping
+                    </option>
+
+                    <option value="stopped">
+                        Stopped
+                    </option>
+
+                    <option value="failed">
+                        Failed
+                    </option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             SESSION GRID
+        ================================================== -->
+
+        <div
+            class="session-grid"
+            id="sessionGrid"
+        >
+
+
+            {% for session in sessions %}
+
+
+                <div
+                    class="session-card session-item"
+                    data-title="{{ session.title|lower }}"
+                    data-status="{{ session.status|lower }}"
+                >
+
+
+                    <!-- =====================================
+                         CARD TOP
+                    ====================================== -->
+
+                    <div class="session-card-top">
+
+
+                        <div class="session-title-area">
+
+
+                            <div
+                                class="session-title"
+                                title="{{ session.title }}"
+                            >
+
+                                {{ session.title|default:"Untitled Session" }}
+
+                            </div>
+
+
+                            <div class="session-id">
+
+                                Session #{{ session.pk }}
+
+                            </div>
+
+
+                        </div>
+
+
+
+                        <!-- STATUS -->
+
+                        {% if session.status == "live" %}
+
+                            <span class="status-badge status-live">
+
+                                <i class="bi bi-broadcast-pin"></i>
+
+                                Live
+
+                            </span>
+
+
+                        {% elif session.status == "starting" %}
+
+                            <span class="status-badge status-starting">
+
+                                <i class="bi bi-hourglass-split"></i>
+
+                                Starting
+
+                            </span>
+
+
+                        {% elif session.status == "queued" %}
+
+                            <span class="status-badge status-queued">
+
+                                <i class="bi bi-clock-history"></i>
+
+                                Queued
+
+                            </span>
+
+
+                        {% elif session.status == "stopping" %}
+
+                            <span class="status-badge status-stopping">
+
+                                <i class="bi bi-stop-circle"></i>
+
+                                Stopping
+
+                            </span>
+
+
+                        {% elif session.status == "stopped" %}
+
+                            <span class="status-badge status-stopped">
+
+                                <i class="bi bi-stop-circle"></i>
+
+                                Stopped
+
+                            </span>
+
+
+                        {% elif session.status == "failed" %}
+
+                            <span class="status-badge status-failed">
+
+                                <i class="bi bi-exclamation-circle"></i>
+
+                                Failed
+
+                            </span>
+
+
+                        {% else %}
+
+                            <span class="status-badge status-draft">
+
+                                <i class="bi bi-file-earmark"></i>
+
+                                {{ session.get_status_display }}
+
+                            </span>
+
+                        {% endif %}
+
+
+                    </div>
+
+
+
+                    <!-- =====================================
+                         BODY
+                    ====================================== -->
+
+                    <div class="session-card-body">
+
+
+                        <!-- =================================
+                             PLAYLIST
+                        ================================== -->
+
+                        <div class="session-playlist">
+
+
+                            <div class="session-playlist-icon">
+
+                                <i class="bi bi-collection-play"></i>
+
+                            </div>
+
+
+                            <div class="session-playlist-info">
+
+
+                                <div class="session-playlist-label">
+                                    Playlist
+                                </div>
+
+
+                                {% if session.playlist %}
+
+                                    <div
+                                        class="session-playlist-name"
+                                        title="{{ session.playlist.name }}"
+                                    >
+
+                                        {{ session.playlist.name }}
+
+                                    </div>
+
+                                {% else %}
+
+                                    <div class="session-playlist-name">
+
+                                        No playlist selected
+
+                                    </div>
+
+                                {% endif %}
+
+
+                            </div>
+
+
+                        </div>
+
+
+
+                        <!-- =================================
+                             META
+                        ================================== -->
+
+                        <div class="session-meta-grid">
+
+
+                            <!-- MODE -->
+
+                            <div class="session-meta">
+
+                                <div class="session-meta-label">
+                                    Mode
+                                </div>
+
+
+                                <div class="session-meta-value">
+
+                                    {% if session.mode == "repeat" %}
+
+                                        <i class="bi bi-arrow-repeat me-1"></i>
+                                        Repeat
+
+                                    {% else %}
+
+                                        <i class="bi bi-list-ol me-1"></i>
+                                        One by One
+
+                                    {% endif %}
+
+                                </div>
+
+                            </div>
+
+
+
+                            <!-- VIDEOS -->
+
+                            <div class="session-meta">
+
+                                <div class="session-meta-label">
+                                    Videos
+                                </div>
+
+
+                                <div class="session-meta-value">
+
+                                    {{ session.items.count }}
+
+                                </div>
+
+                            </div>
+
+
+
+                            <!-- CURRENT -->
+
+                            <div class="session-meta">
+
+                                <div class="session-meta-label">
+                                    Current Video
+                                </div>
+
+
+                                <div class="session-meta-value">
+
+                                    {% if session.items.count %}
+
+                                        {{ session.current_item_position|add:"1" }}
+                                        / {{ session.items.count }}
+
+                                    {% else %}
+
+                                        0 / 0
+
+                                    {% endif %}
+
+                                </div>
+
+                            </div>
+
+
+
+                            <!-- PRIVACY -->
+
+                            <div class="session-meta">
+
+                                <div class="session-meta-label">
+                                    YouTube Privacy
+                                </div>
+
+
+                                <div class="session-meta-value">
+
+                                    {{ session.get_youtube_privacy_display }}
+
+                                </div>
+
+                            </div>
+
+
+
+                            <!-- CREATED -->
+
+                            <div class="session-meta">
+
+                                <div class="session-meta-label">
+                                    Created
+                                </div>
+
+
+                                <div class="session-meta-value">
+
+                                    {{ session.created_at|date:"d M Y" }}
+
+                                </div>
+
+                            </div>
+
+
+
+                            <!-- START -->
+
+                            <div class="session-meta">
+
+                                <div class="session-meta-label">
+
+                                    {% if session.scheduled_start %}
+                                        Scheduled
+                                    {% else %}
+                                        Started
+                                    {% endif %}
+
+                                </div>
+
+
+                                <div class="session-meta-value">
+
+
+                                    {% if session.scheduled_start %}
+
+                                        {{ session.scheduled_start|date:"d M, h:i A" }}
+
+                                    {% elif session.started_at %}
+
+                                        {{ session.started_at|date:"d M, h:i A" }}
+
+                                    {% else %}
+
+                                        Not started
+
+                                    {% endif %}
+
+
+                                </div>
+
+                            </div>
+
+
+                        </div>
+
+
+
+                        <!-- =================================
+                             YOUTUBE RTMP
+                        ================================== -->
+
+                        <div class="youtube-info">
+
+
+                            <div class="youtube-icon">
+
+                                <i class="bi bi-youtube"></i>
+
+                            </div>
+
+
+                            <div class="youtube-details">
+
+
+                                <div class="youtube-label">
+
+                                    YouTube Live
+
+                                </div>
+
+
+                                <div class="youtube-title">
+
+                                    {% if session.youtube_url %}
+
+                                        <a
+                                            href="{{ session.youtube_url }}"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            class="youtube-link"
+                                        >
+
+                                            <i class="bi bi-box-arrow-up-right me-1"></i>
+
+                                            Open YouTube Stream
+
+                                        </a>
+
+                                    {% else %}
+
+                                        RTMP configured
+
+                                    {% endif %}
+
+                                </div>
+
+
+                            </div>
+
+
+                        </div>
+
+
+
+                        <!-- =================================
+                             LIVE PROGRESS
+                        ================================== -->
+
+                        {% if session.status == "live" %}
+
+                            <div class="stream-progress">
+
+
+                                <div class="stream-progress-header">
+
+                                    <span>
+                                        Stream Status
+                                    </span>
+
+                                    <span>
+                                        LIVE
+                                    </span>
+
+                                </div>
+
+
+                                <div class="stream-progress-bar">
+
+                                    <div
+                                        class="stream-progress-value"
+                                    ></div>
+
+                                </div>
+
+
+                            </div>
+
+                        {% endif %}
+
+
+
+                        <!-- =================================
+                             ERROR
+                        ================================== -->
+
+                        {% if session.status == "failed" and session.last_error %}
+
+                            <div class="session-error">
+
+                                <strong>
+                                    Streaming Error
+                                </strong>
+
+                                {{ session.last_error|truncatechars:180 }}
+
+                            </div>
+
+                        {% endif %}
+
+
+                    </div>
+
+
+
+                    <!-- =====================================
+                         FOOTER
+                    ====================================== -->
+
+                    <div class="session-card-footer">
+
+
+                        <div class="session-created">
+
+                            {% if session.ended_at %}
+
+                                Ended
+                                {{ session.ended_at|date:"d M Y, h:i A" }}
+
+                            {% elif session.started_at %}
+
+                                Started
+                                {{ session.started_at|date:"d M Y, h:i A" }}
+
+                            {% else %}
+
+                                Created
+                                {{ session.created_at|date:"d M Y, h:i A" }}
+
+                            {% endif %}
+
+                        </div>
+
+
+
+                        <div class="session-actions">
+
+
+                            <!-- =================================
+                                 VIEW
+                            ================================== -->
+
+                            <a
+                                href="{% url 'streaming:session_detail' session.pk %}"
+                                class="session-action"
+                                title="View session"
+                            >
+
+                                <i class="bi bi-eye"></i>
+
+                            </a>
+
+
+
+                            <!-- =================================
+                                 START
+                            ================================== -->
+
+                            {% if session.status == "draft" or session.status == "stopped" or session.status == "failed" %}
+
+                                <form
+                                    method="post"
+                                    action="{% url 'streaming:session_start' session.pk %}"
+                                    style="display:inline;"
+                                    onsubmit="return confirmStartStream(this);"
+                                >
+
+                                    {% csrf_token %}
+
+                                    <button
+                                        type="submit"
+                                        class="session-action start"
+                                        title="Start stream"
+                                    >
+
+                                        <i class="bi bi-play-fill"></i>
+
+                                    </button>
+
+                                </form>
+
+                            {% endif %}
+
+
+
+                            <!-- =================================
+                                 STOP
+                            ================================== -->
+
+                            {% if session.status == "live" or session.status == "starting" or session.status == "queued" %}
+
+                                <button
+                                    type="button"
+                                    class="session-action stop"
+                                    title="Stop stream"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#stopSessionModal{{ session.pk }}"
+                                >
+
+                                    <i class="bi bi-stop-fill"></i>
+
+                                </button>
+
+                            {% endif %}
+
+
+                        </div>
+
+
+                    </div>
+
+
+                </div>
+
+
+
+                <!-- =================================================
+                     STOP MODAL
+                ================================================== -->
+
+                {% if session.status == "live" or session.status == "starting" or session.status == "queued" %}
+
+                    <div
+                        class="modal fade"
+                        id="stopSessionModal{{ session.pk }}"
+                        tabindex="-1"
+                        aria-hidden="true"
+                    >
+
+                        <div class="modal-dialog modal-dialog-centered">
+
+                            <div class="modal-content border-0 shadow">
+
+                                <div class="modal-body text-center p-4">
+
+
+                                    <div class="modal-warning-icon">
+
+                                        <i class="bi bi-stop-circle"></i>
+
+                                    </div>
+
+
+                                    <h5 class="fw-bold mb-2">
+
+                                        Stop Stream?
+
+                                    </h5>
+
+
+                                    <p class="text-muted small mb-4">
+
+                                        Are you sure you want to stop
+
+                                        <strong>
+                                            "{{ session.title }}"
+                                        </strong>
+
+                                        ?
+
+                                        <br>
+
+                                        The YouTube live stream will be stopped.
+
+                                    </p>
+
+
+                                    <div class="d-flex justify-content-center gap-2">
+
+
+                                        <button
+                                            type="button"
+                                            class="btn btn-light"
+                                            data-bs-dismiss="modal"
+                                        >
+
+                                            Cancel
+
+                                        </button>
+
+
+                                        <form
+                                            method="post"
+                                            action="{% url 'streaming:session_stop' session.pk %}"
+                                        >
+
+                                            {% csrf_token %}
+
+
+                                            <button
+                                                type="submit"
+                                                class="btn btn-warning"
+                                            >
+
+                                                <i class="bi bi-stop-fill me-1"></i>
+
+                                                Stop Stream
+
+                                            </button>
+
+                                        </form>
+
+
+                                    </div>
+
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                {% endif %}
+
+
+            {% endfor %}
+
+
+        </div>
+
+
+
+        <!-- =================================================
+             NO SEARCH RESULT
+        ================================================== -->
+
+        <div
+            id="noSessionResults"
+            class="session-empty mt-4"
+            style="display:none;"
+        >
+
+            <div class="session-empty-icon">
+
+                <i class="bi bi-search"></i>
+
+            </div>
+
+
+            <h3>
+                No sessions found
+            </h3>
+
+
+            <p>
+                Try changing your search or status filter.
+            </p>
+
+        </div>
+
+
+    {% else %}
+
+
+        <!-- =================================================
+             EMPTY STATE
+        ================================================== -->
+
+        <div class="session-empty">
+
+
+            <div class="session-empty-icon">
+
+                <i class="bi bi-broadcast"></i>
+
+            </div>
+
+
+            <h3>
+                No streaming sessions yet
+            </h3>
+
+
+            <p>
+                Create a session, select your playlist,
+                and connect it to your YouTube RTMP stream.
+            </p>
+
+
+            <a
+                href="{% url 'streaming:session_create' %}"
+                class="create-session-btn"
+            >
+
+                <i class="bi bi-broadcast-pin"></i>
+
+                Create Your First Session
+
+            </a>
+
+
+        </div>
+
+
+    {% endif %}
+
+
+</div>
+
+{% endblock %}
+
+
+
+{% block extra_js %}
+
+<script>
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+
+        /* =================================================
+           ELEMENTS
+        ================================================== */
+
+        const searchInput =
+            document.getElementById(
+                "sessionSearch"
+            );
+
+
+        const statusFilter =
+            document.getElementById(
+                "sessionStatusFilter"
+            );
+
+
+        const sessionItems =
+            document.querySelectorAll(
+                ".session-item"
+            );
+
+
+        const noResults =
+            document.getElementById(
+                "noSessionResults"
+            );
+
+
+
+        /* =================================================
+           FILTER
+        ================================================== */
+
+        function filterSessions() {
+
+            const search =
+                searchInput
+                    ? searchInput.value
+                        .toLowerCase()
+                        .trim()
+                    : "";
+
+
+            const status =
+                statusFilter
+                    ? statusFilter.value
+                    : "";
+
+
+            let visible = 0;
+
+
+            sessionItems.forEach(
+                function (item) {
+
+                    const title =
+                        item.dataset.title ||
+                        "";
+
+
+                    const itemStatus =
+                        item.dataset.status ||
+                        "";
+
+
+                    const searchMatch =
+                        !search ||
+                        title.includes(
+                            search
+                        );
+
+
+                    const statusMatch =
+                        !status ||
+                        itemStatus === status;
+
+
+                    if (
+                        searchMatch &&
+                        statusMatch
+                    ) {
+
+                        item.style.display = "";
+
+                        visible++;
+
+                    }
+                    else {
+
+                        item.style.display =
+                            "none";
+
+                    }
+
+                }
+            );
+
+
+            if (noResults) {
+
+                noResults.style.display =
+                    visible === 0
+                        ? ""
+                        : "none";
+
+            }
+
+        }
+
+
+
+        /* =================================================
+           SEARCH
+        ================================================== */
+
+        if (searchInput) {
+
+            searchInput.addEventListener(
+                "input",
+                filterSessions
+            );
+
+        }
+
+
+
+        /* =================================================
+           STATUS FILTER
+        ================================================== */
+
+        if (statusFilter) {
+
+            statusFilter.addEventListener(
+                "change",
+                filterSessions
+            );
+
+        }
+
+
+
+        /* =================================================
+           INITIAL FILTER
+        ================================================== */
+
+        filterSessions();
+
+
+
+        /* =================================================
+           AUTO REFRESH
+        ================================================== */
+
+        /*
+         * Refresh when a stream is active.
+         *
+         * Later, after we implement WebSocket/Celery
+         * status updates, this can be replaced with
+         * real-time updates.
+         */
+
+        const activeSessions =
+            document.querySelectorAll(
+                ".status-live, .status-starting, .status-queued"
+            );
+
+
+        if (
+            activeSessions.length > 0
+        ) {
+
+            setTimeout(
+                function () {
+
+                    window.location.reload();
+
+                },
+                30000
+            );
+
+        }
+
+    }
+
+);
+
+
+
+/* =========================================================
+   START STREAM CONFIRMATION
+========================================================= */
+
+function confirmStartStream(form) {
+
+    return confirm(
+        "Start this YouTube streaming session?"
+    );
+
+}
+
+</script>
+
+{% endblock %}

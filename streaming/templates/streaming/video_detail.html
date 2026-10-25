@@ -1,0 +1,1569 @@
+{% extends "streaming/base.html" %}
+
+{% block title %}
+    {{ video.title }} | Stream Studio
+{% endblock %}
+
+{% block page_title %}
+    Video Details
+{% endblock %}
+
+{% block page_subtitle %}
+    View and manage your uploaded video
+{% endblock %}
+
+
+{% block extra_css %}
+
+<style>
+
+    /* =====================================================
+       VIDEO DETAIL PAGE
+    ====================================================== */
+
+    .video-detail-page {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+
+    /* =====================================================
+       TOP ACTIONS
+    ====================================================== */
+
+    .detail-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 9px 13px;
+        border: 1px solid #e2e8f0;
+        background: #ffffff;
+        border-radius: 9px;
+        color: #475569;
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .back-btn:hover {
+        background: #f8fafc;
+        color: #111827;
+    }
+
+    .detail-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .detail-action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 9px 13px;
+        border-radius: 9px;
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        border: 1px solid #e2e8f0;
+        background: #ffffff;
+        color: #475569;
+        cursor: pointer;
+    }
+
+    .detail-action-btn:hover {
+        background: #f8fafc;
+        color: #111827;
+    }
+
+    .detail-action-btn.danger:hover {
+        background: #fef2f2;
+        border-color: #fecaca;
+        color: #dc2626;
+    }
+
+
+    /* =====================================================
+       MAIN GRID
+    ====================================================== */
+
+    .detail-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 350px;
+        gap: 22px;
+        align-items: start;
+    }
+
+
+    /* =====================================================
+       VIDEO CARD
+    ====================================================== */
+
+    .player-card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .video-player-wrapper {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        background: #020617;
+        position: relative;
+    }
+
+    .video-player {
+        width: 100%;
+        height: 100%;
+        display: block;
+        background: #020617;
+    }
+
+    .video-player::-webkit-media-controls-panel {
+        background: rgba(0, 0, 0, 0.8);
+    }
+
+
+    /* =====================================================
+       VIDEO NOT READY
+    ====================================================== */
+
+    .video-not-ready {
+        width: 100%;
+        height: 100%;
+        min-height: 300px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #94a3b8;
+        text-align: center;
+        padding: 30px;
+    }
+
+    .video-not-ready-icon {
+        width: 65px;
+        height: 65px;
+        border-radius: 17px;
+        background: #1e293b;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        margin-bottom: 14px;
+    }
+
+    .video-not-ready h3 {
+        color: #e2e8f0;
+        font-size: 15px;
+        margin: 0 0 6px;
+    }
+
+    .video-not-ready p {
+        font-size: 12px;
+        margin: 0;
+        color: #64748b;
+    }
+
+
+    /* =====================================================
+       PLAYER INFO
+    ====================================================== */
+
+    .player-info {
+        padding: 20px;
+    }
+
+    .video-title-large {
+        font-size: 21px;
+        font-weight: 700;
+        color: #0f172a;
+        line-height: 1.35;
+        margin-bottom: 8px;
+        word-break: break-word;
+    }
+
+    .video-description-large {
+        color: #64748b;
+        font-size: 13px;
+        line-height: 1.7;
+        white-space: pre-line;
+        margin-bottom: 18px;
+    }
+
+    .video-created-info {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+        color: #94a3b8;
+        font-size: 11px;
+    }
+
+    .video-created-info span {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+
+    /* =====================================================
+       STATUS
+    ====================================================== */
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: 20px;
+        font-size: 10px;
+        font-weight: 700;
+    }
+
+    .status-ready {
+        background: #ecfdf5;
+        color: #047857;
+    }
+
+    .status-processing {
+        background: #fffbeb;
+        color: #b45309;
+    }
+
+    .status-uploading {
+        background: #eff6ff;
+        color: #1d4ed8;
+    }
+
+    .status-failed {
+        background: #fef2f2;
+        color: #b91c1c;
+    }
+
+    .status-archived {
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+
+    /* =====================================================
+       SIDE CARDS
+    ====================================================== */
+
+    .side-card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        overflow: hidden;
+        margin-bottom: 18px;
+    }
+
+    .side-card:last-child {
+        margin-bottom: 0;
+    }
+
+    .side-card-header {
+        padding: 16px 18px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .side-card-header h3 {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 700;
+        color: #111827;
+    }
+
+    .side-card-body {
+        padding: 17px 18px;
+    }
+
+
+    /* =====================================================
+       STATUS CARD
+    ====================================================== */
+
+    .status-main {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .status-label {
+        color: #94a3b8;
+        font-size: 11px;
+    }
+
+
+    /* =====================================================
+       META
+    ====================================================== */
+
+    .meta-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .meta-row {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 15px;
+        padding: 10px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .meta-row:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .meta-row:first-child {
+        padding-top: 0;
+    }
+
+    .meta-label {
+        color: #94a3b8;
+        font-size: 10px;
+        flex-shrink: 0;
+    }
+
+    .meta-value {
+        color: #334155;
+        font-size: 11px;
+        font-weight: 600;
+        text-align: right;
+        word-break: break-word;
+    }
+
+
+    /* =====================================================
+       VISIBILITY
+    ====================================================== */
+
+    .visibility-box {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 12px;
+        background: #f8fafc;
+        border-radius: 10px;
+    }
+
+    .visibility-box-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 9px;
+        background: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #64748b;
+        font-size: 16px;
+    }
+
+    .visibility-box-title {
+        color: #334155;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .visibility-box-text {
+        color: #94a3b8;
+        font-size: 10px;
+        margin-top: 2px;
+    }
+
+
+    /* =====================================================
+       PLAYLIST
+    ====================================================== */
+
+    .playlist-form {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .playlist-select {
+        width: 100%;
+        height: 42px;
+        border: 1px solid #dbe2ea;
+        border-radius: 9px;
+        padding: 0 11px;
+        color: #475569;
+        background: #ffffff;
+        font-size: 12px;
+        outline: none;
+    }
+
+    .playlist-select:focus {
+        border-color: #94a3b8;
+        box-shadow:
+            0 0 0 3px
+            rgba(148,163,184,0.12);
+    }
+
+    .playlist-add-btn {
+        width: 100%;
+        height: 42px;
+        border: 0;
+        border-radius: 9px;
+        background: #111827;
+        color: #ffffff;
+        font-size: 12px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        cursor: pointer;
+    }
+
+    .playlist-add-btn:hover {
+        background: #1f2937;
+    }
+
+
+    .no-playlists {
+        text-align: center;
+        padding: 10px 0 3px;
+        color: #94a3b8;
+        font-size: 11px;
+        line-height: 1.5;
+    }
+
+    .create-playlist-link {
+        display: inline-flex;
+        margin-top: 9px;
+        color: #334155;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .create-playlist-link:hover {
+        color: #111827;
+    }
+
+
+    /* =====================================================
+       STREAM READY
+    ====================================================== */
+
+    .stream-ready {
+        background:
+            linear-gradient(
+                135deg,
+                #0f172a,
+                #1e293b
+            );
+        color: #ffffff;
+        border-radius: 12px;
+        padding: 15px;
+    }
+
+    .stream-ready-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        background: rgba(255,255,255,0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 10px;
+        color: #ffffff;
+    }
+
+    .stream-ready-title {
+        font-size: 13px;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+    .stream-ready-text {
+        color: #94a3b8;
+        font-size: 10px;
+        line-height: 1.5;
+        margin-bottom: 12px;
+    }
+
+    .create-stream-btn {
+        width: 100%;
+        height: 37px;
+        border-radius: 8px;
+        background: #ffffff;
+        color: #111827;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        font-size: 11px;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .create-stream-btn:hover {
+        color: #111827;
+        background: #f1f5f9;
+    }
+
+
+    /* =====================================================
+       DELETE MODAL
+    ====================================================== */
+
+    .delete-modal-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        background: #fef2f2;
+        color: #dc2626;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 15px;
+        font-size: 23px;
+    }
+
+
+    /* =====================================================
+       RESPONSIVE
+    ====================================================== */
+
+    @media (max-width: 991px) {
+
+        .detail-grid {
+            grid-template-columns: 1fr;
+        }
+
+    }
+
+
+    @media (max-width: 600px) {
+
+        .detail-topbar {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .back-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .detail-actions {
+            width: 100%;
+        }
+
+        .detail-action-btn {
+            flex: 1;
+            justify-content: center;
+        }
+
+        .player-info {
+            padding: 16px;
+        }
+
+        .video-title-large {
+            font-size: 18px;
+        }
+
+    }
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="video-detail-page">
+
+
+    <!-- =====================================================
+         TOP ACTIONS
+    ====================================================== -->
+
+    <div class="detail-topbar">
+
+
+        <a
+            href="{% url 'streaming:video_list' %}"
+            class="back-btn"
+        >
+
+            <i class="bi bi-arrow-left"></i>
+
+            Back to Videos
+
+        </a>
+
+
+        <div class="detail-actions">
+
+
+            <button
+                type="button"
+                class="detail-action-btn danger"
+                data-bs-toggle="modal"
+                data-bs-target="#deleteVideoModal"
+            >
+
+                <i class="bi bi-trash3"></i>
+
+                Delete
+
+            </button>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- =====================================================
+         MAIN GRID
+    ====================================================== -->
+
+    <div class="detail-grid">
+
+
+        <!-- =================================================
+             LEFT
+        ================================================== -->
+
+        <div>
+
+
+            <!-- =============================================
+                 PLAYER
+            ============================================== -->
+
+            <div class="player-card">
+
+
+                <div class="video-player-wrapper">
+
+
+                    {% if video.video_file %}
+
+                        <video
+                            class="video-player"
+                            id="videoPlayer"
+                            controls
+                            preload="metadata"
+                            {% if video.thumbnail %}
+                                poster="{{ video.thumbnail.url }}"
+                            {% endif %}
+                        >
+
+                            <source
+                                src="{{ video.video_file.url }}"
+                                type="video/mp4"
+                            >
+
+                            Your browser does not support
+                            HTML5 video.
+
+                        </video>
+
+
+                    {% else %}
+
+                        <div class="video-not-ready">
+
+                            <div class="video-not-ready-icon">
+
+                                <i class="bi bi-camera-video-off"></i>
+
+                            </div>
+
+                            <h3>
+                                Video file unavailable
+                            </h3>
+
+                            <p>
+                                The video file could not be found.
+                            </p>
+
+                        </div>
+
+                    {% endif %}
+
+
+                </div>
+
+
+                <!-- =========================================
+                     PLAYER INFORMATION
+                ========================================== -->
+
+                <div class="player-info">
+
+
+                    <div class="video-title-large">
+
+                        {{ video.title }}
+
+                    </div>
+
+
+                    {% if video.description %}
+
+                        <div class="video-description-large">
+
+                            {{ video.description }}
+
+                        </div>
+
+                    {% endif %}
+
+
+                    <div class="video-created-info">
+
+
+                        <span>
+
+                            <i class="bi bi-calendar3"></i>
+
+                            Uploaded
+                            {{ video.created_at|date:"d M Y, h:i A" }}
+
+                        </span>
+
+
+                        {% if video.updated_at %}
+
+                            <span>
+
+                                <i class="bi bi-arrow-clockwise"></i>
+
+                                Updated
+                                {{ video.updated_at|date:"d M Y, h:i A" }}
+
+                            </span>
+
+                        {% endif %}
+
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+        <!-- =================================================
+             RIGHT SIDEBAR
+        ================================================== -->
+
+        <div>
+
+
+            <!-- =============================================
+                 STATUS
+            ============================================== -->
+
+            <div class="side-card">
+
+                <div class="side-card-header">
+
+                    <h3>
+                        Video Status
+                    </h3>
+
+                </div>
+
+
+                <div class="side-card-body">
+
+
+                    <div class="status-main">
+
+                        <span class="status-label">
+                            Current status
+                        </span>
+
+
+                        {% if video.status == "ready" %}
+
+                            <span class="status-badge status-ready">
+
+                                <i class="bi bi-check-circle-fill"></i>
+
+                                Ready
+
+                            </span>
+
+                        {% elif video.status == "processing" %}
+
+                            <span class="status-badge status-processing">
+
+                                <i class="bi bi-arrow-repeat"></i>
+
+                                Processing
+
+                            </span>
+
+                        {% elif video.status == "uploading" %}
+
+                            <span class="status-badge status-uploading">
+
+                                <i class="bi bi-cloud-arrow-up"></i>
+
+                                Uploading
+
+                            </span>
+
+                        {% elif video.status == "failed" %}
+
+                            <span class="status-badge status-failed">
+
+                                <i class="bi bi-exclamation-circle"></i>
+
+                                Failed
+
+                            </span>
+
+                        {% elif video.status == "archived" %}
+
+                            <span class="status-badge status-archived">
+
+                                <i class="bi bi-archive"></i>
+
+                                Archived
+
+                            </span>
+
+                        {% else %}
+
+                            <span class="status-badge status-processing">
+
+                                {{ video.get_status_display }}
+
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    {% if video.status == "processing" %}
+
+                        <div class="alert alert-warning mb-0 py-2">
+
+                            <small>
+
+                                <i class="bi bi-hourglass-split me-1"></i>
+
+                                Your video is currently being processed.
+
+                            </small>
+
+                        </div>
+
+                    {% endif %}
+
+
+                    {% if video.status == "failed" %}
+
+                        <div class="alert alert-danger mb-0 py-2">
+
+                            <small>
+
+                                <i class="bi bi-exclamation-triangle me-1"></i>
+
+                                Video processing failed.
+
+                            </small>
+
+                        </div>
+
+                    {% endif %}
+
+
+                </div>
+
+            </div>
+
+
+            <!-- =============================================
+                 VIDEO INFORMATION
+            ============================================== -->
+
+            <div class="side-card">
+
+                <div class="side-card-header">
+
+                    <h3>
+                        Video Information
+                    </h3>
+
+                </div>
+
+
+                <div class="side-card-body">
+
+                    <div class="meta-list">
+
+
+                        <!-- Duration -->
+
+                        <div class="meta-row">
+
+                            <span class="meta-label">
+                                Duration
+                            </span>
+
+                            <span class="meta-value">
+
+                                {% if video.duration_seconds %}
+
+                                    {{ video.duration_minutes|floatformat:1 }}
+                                    minutes
+
+                                {% else %}
+
+                                    —
+
+                                {% endif %}
+
+                            </span>
+
+                        </div>
+
+
+                        <!-- File size -->
+
+                        <div class="meta-row">
+
+                            <span class="meta-label">
+                                File Size
+                            </span>
+
+                            <span class="meta-value">
+
+                                {% if video.file_size_mb %}
+
+                                    {{ video.file_size_mb|floatformat:2 }}
+                                    MB
+
+                                {% else %}
+
+                                    —
+
+                                {% endif %}
+
+                            </span>
+
+                        </div>
+
+
+                        <!-- Resolution -->
+
+                        <div class="meta-row">
+
+                            <span class="meta-label">
+                                Resolution
+                            </span>
+
+                            <span class="meta-value">
+
+                                {% if video.width and video.height %}
+
+                                    {{ video.width }}
+                                    ×
+                                    {{ video.height }}
+
+                                {% else %}
+
+                                    —
+
+                                {% endif %}
+
+                            </span>
+
+                        </div>
+
+
+                        <!-- FPS -->
+
+                        <div class="meta-row">
+
+                            <span class="meta-label">
+                                Frame Rate
+                            </span>
+
+                            <span class="meta-value">
+
+                                {% if video.fps %}
+
+                                    {{ video.fps|floatformat:2 }}
+                                    FPS
+
+                                {% else %}
+
+                                    —
+
+                                {% endif %}
+
+                            </span>
+
+                        </div>
+
+
+                        <!-- Codec -->
+
+                        <div class="meta-row">
+
+                            <span class="meta-label">
+                                Video Codec
+                            </span>
+
+                            <span class="meta-value">
+
+                                {% if video.video_codec %}
+
+                                    {{ video.video_codec }}
+
+                                {% else %}
+
+                                    —
+
+                                {% endif %}
+
+                            </span>
+
+                        </div>
+
+
+                        <!-- Audio -->
+
+                        <div class="meta-row">
+
+                            <span class="meta-label">
+                                Audio Codec
+                            </span>
+
+                            <span class="meta-value">
+
+                                {% if video.audio_codec %}
+
+                                    {{ video.audio_codec }}
+
+                                {% else %}
+
+                                    —
+
+                                {% endif %}
+
+                            </span>
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =============================================
+                 VISIBILITY
+            ============================================== -->
+
+            <div class="side-card">
+
+                <div class="side-card-header">
+
+                    <h3>
+                        Visibility
+                    </h3>
+
+                </div>
+
+
+                <div class="side-card-body">
+
+
+                    <div class="visibility-box">
+
+
+                        <div class="visibility-box-icon">
+
+                            {% if video.is_public %}
+
+                                <i class="bi bi-globe2"></i>
+
+                            {% else %}
+
+                                <i class="bi bi-lock"></i>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <div>
+
+                            <div class="visibility-box-title">
+
+                                {% if video.is_public %}
+
+                                    Public Video
+
+                                {% else %}
+
+                                    Private Video
+
+                                {% endif %}
+
+                            </div>
+
+
+                            <div class="visibility-box-text">
+
+                                {% if video.is_public %}
+
+                                    This video is available publicly.
+
+                                {% else %}
+
+                                    This video is private.
+
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =============================================
+                 ADD TO PLAYLIST
+            ============================================== -->
+
+            <div class="side-card">
+
+                <div class="side-card-header">
+
+                    <h3>
+                        Add to Playlist
+                    </h3>
+
+                </div>
+
+
+                <div class="side-card-body">
+
+
+                    {% if playlists %}
+
+                        <form
+                            method="post"
+                            action="{% url 'streaming:playlist_add_video' playlists.first.pk %}"
+                            id="playlistForm"
+                        >
+
+                            {% csrf_token %}
+
+
+                            <div class="playlist-form">
+
+
+                                <select
+                                    class="playlist-select"
+                                    id="playlistSelect"
+                                    required
+                                >
+
+                                    <option
+                                        value=""
+                                        selected
+                                        disabled
+                                    >
+
+                                        Select playlist
+
+                                    </option>
+
+
+                                    {% for playlist in playlists %}
+
+                                        <option
+                                            value="{{ playlist.pk }}"
+                                        >
+
+                                            {{ playlist.name }}
+
+                                        </option>
+
+                                    {% endfor %}
+
+                                </select>
+
+
+                                <input
+                                    type="hidden"
+                                    name="video_id"
+                                    value="{{ video.pk }}"
+                                >
+
+
+                                <button
+                                    type="submit"
+                                    class="playlist-add-btn"
+                                    id="playlistAddButton"
+                                >
+
+                                    <i class="bi bi-plus-lg"></i>
+
+                                    Add to Playlist
+
+                                </button>
+
+
+                            </div>
+
+
+                        </form>
+
+
+                    {% else %}
+
+                        <div class="no-playlists">
+
+                            <i
+                                class="bi bi-list-ul d-block mb-2"
+                                style="font-size: 22px;"
+                            ></i>
+
+                            You don't have any playlists yet.
+
+
+                            <a
+                                href="{% url 'streaming:playlist_create' %}"
+                                class="create-playlist-link"
+                            >
+
+                                <i class="bi bi-plus-lg me-1"></i>
+
+                                Create Playlist
+
+                            </a>
+
+                        </div>
+
+                    {% endif %}
+
+
+                </div>
+
+            </div>
+
+
+            <!-- =============================================
+                 STREAM CARD
+            ============================================== -->
+
+            {% if video.status == "ready" %}
+
+                <div class="side-card">
+
+                    <div class="side-card-body">
+
+                        <div class="stream-ready">
+
+
+                            <div class="stream-ready-icon">
+
+                                <i class="bi bi-broadcast"></i>
+
+                            </div>
+
+
+                            <div class="stream-ready-title">
+
+                                Ready for Streaming
+
+                            </div>
+
+
+                            <div class="stream-ready-text">
+
+                                This video is ready to be added
+                                to a playlist and streamed to
+                                YouTube.
+
+                            </div>
+
+
+                            <a
+                                href="{% url 'streaming:session_create' %}"
+                                class="create-stream-btn"
+                            >
+
+                                <i class="bi bi-broadcast-pin"></i>
+
+                                Create Streaming Session
+
+                            </a>
+
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            {% endif %}
+
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+<!-- =====================================================
+     DELETE MODAL
+====================================================== -->
+
+<div
+    class="modal fade"
+    id="deleteVideoModal"
+    tabindex="-1"
+    aria-hidden="true"
+>
+
+    <div
+        class="modal-dialog modal-dialog-centered"
+    >
+
+        <div class="modal-content border-0 shadow">
+
+
+            <div class="modal-body text-center p-4">
+
+
+                <div class="delete-modal-icon">
+
+                    <i class="bi bi-trash3"></i>
+
+                </div>
+
+
+                <h5 class="fw-bold mb-2">
+
+                    Delete Video?
+
+                </h5>
+
+
+                <p class="text-muted small mb-4">
+
+                    Are you sure you want to delete
+
+                    <strong>
+                        "{{ video.title }}"
+                    </strong>
+
+                    ?
+
+                    <br>
+
+                    This action cannot be undone.
+
+                </p>
+
+
+                <div
+                    class="d-flex justify-content-center gap-2"
+                >
+
+
+                    <button
+                        type="button"
+                        class="btn btn-light"
+                        data-bs-dismiss="modal"
+                    >
+
+                        Cancel
+
+                    </button>
+
+
+                    <form
+                        method="post"
+                        action="{% url 'streaming:video_delete' video.pk %}"
+                    >
+
+                        {% csrf_token %}
+
+
+                        <button
+                            type="submit"
+                            class="btn btn-danger"
+                        >
+
+                            <i class="bi bi-trash3 me-1"></i>
+
+                            Delete Video
+
+                        </button>
+
+                    </form>
+
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script>
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+
+        /* =================================================
+           VIDEO PLAYER
+        ================================================== */
+
+        const videoPlayer =
+            document.getElementById(
+                "videoPlayer"
+            );
+
+
+        if (videoPlayer) {
+
+            videoPlayer.addEventListener(
+                "error",
+                function () {
+
+                    console.warn(
+                        "Video could not be loaded."
+                    );
+
+                }
+            );
+
+        }
+
+
+        /* =================================================
+           PLAYLIST
+        ================================================== */
+
+        const playlistSelect =
+            document.getElementById(
+                "playlistSelect"
+            );
+
+        const playlistForm =
+            document.getElementById(
+                "playlistForm"
+            );
+
+
+        if (
+            playlistSelect &&
+            playlistForm
+        ) {
+
+            playlistForm.addEventListener(
+                "submit",
+                function (event) {
+
+
+                    const playlistId =
+                        playlistSelect.value;
+
+
+                    if (!playlistId) {
+
+                        event.preventDefault();
+
+                        alert(
+                            "Please select a playlist."
+                        );
+
+                        return;
+
+                    }
+
+
+                    /*
+                     * The Django URL contains the playlist ID.
+                     *
+                     * We replace the placeholder playlist
+                     * URL with the selected playlist.
+                     */
+
+                  const playlistAddVideoUrlTemplate =
+    "{% url 'streaming:playlist_add_video' '00000000-0000-0000-0000-000000000000' %}";
+
+const finalUrl = playlistAddVideoUrlTemplate.replace(
+    "00000000-0000-0000-0000-000000000000",
+    playlistId
+);
+
+playlistForm.action = finalUrl;
+
+                }
+            );
+
+        }
+
+
+    }
+
+);
+
+</script>
+
+{% endblock %}

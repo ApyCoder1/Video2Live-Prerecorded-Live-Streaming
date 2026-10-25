@@ -1,0 +1,2046 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="description"
+        content="Stream Studio - Video Streaming Platform"
+    >
+
+    <meta
+        name="theme-color"
+        content="#0f172a"
+    >
+
+    <title>
+        {% block title %}
+            Stream Studio
+        {% endblock %}
+    </title>
+
+
+    <!-- =====================================================
+         BOOTSTRAP
+    ====================================================== -->
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+
+    <!-- =====================================================
+         BOOTSTRAP ICONS
+    ====================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    >
+
+
+    <!-- =====================================================
+         ALL CUSTOM CSS
+         NO EXTERNAL CSS FILE REQUIRED
+    ====================================================== -->
+
+    <style>
+
+        /* =================================================
+           ROOT
+        ================================================== */
+
+        :root {
+
+            --sidebar-width: 250px;
+
+            --topbar-height: 72px;
+
+            --primary: #111827;
+
+            --primary-light: #1f2937;
+
+            --background: #f8fafc;
+
+            --card: #ffffff;
+
+            --border: #e5e7eb;
+
+            --text: #111827;
+
+            --muted: #64748b;
+
+            --muted-light: #94a3b8;
+
+            --sidebar-text: #cbd5e1;
+
+            --sidebar-muted: #94a3b8;
+
+            --sidebar-active: #ffffff;
+
+            --sidebar-hover: rgba(
+                255,
+                255,
+                255,
+                0.07
+            );
+
+            --success: #10b981;
+
+            --danger: #ef4444;
+
+            --warning: #f59e0b;
+
+            --info: #3b82f6;
+
+        }
+
+
+        /* =================================================
+           GLOBAL
+        ================================================== */
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        html {
+            min-height: 100%;
+        }
+
+
+        body {
+
+            margin: 0;
+
+            padding: 0;
+
+            min-height: 100vh;
+
+            background: var(--background);
+
+            color: var(--text);
+
+            font-family:
+                Inter,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Roboto,
+                Helvetica,
+                Arial,
+                sans-serif;
+
+            font-size: 14px;
+
+        }
+
+
+        a {
+            text-decoration: none;
+        }
+
+
+        button,
+        input,
+        select,
+        textarea {
+            font-family: inherit;
+        }
+
+
+        /* =================================================
+           APP WRAPPER
+        ================================================== */
+
+        .app-wrapper {
+
+            min-height: 100vh;
+
+            width: 100%;
+
+            display: flex;
+
+        }
+
+
+        /* =================================================
+           SIDEBAR
+        ================================================== */
+
+        .sidebar {
+
+            position: fixed;
+
+            top: 0;
+
+            left: 0;
+
+            bottom: 0;
+
+            width: var(--sidebar-width);
+
+            background:
+                linear-gradient(
+                    180deg,
+                    #0f172a 0%,
+                    #111827 100%
+                );
+
+            color: var(--sidebar-text);
+
+            display: flex;
+
+            flex-direction: column;
+
+            z-index: 1050;
+
+            border-right:
+                1px solid
+                rgba(255,255,255,0.05);
+
+        }
+
+
+        /* =================================================
+           SIDEBAR HEADER
+        ================================================== */
+
+        .sidebar-header {
+
+            height: var(--topbar-height);
+
+            min-height: var(--topbar-height);
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            padding:
+                0 18px;
+
+            border-bottom:
+                1px solid
+                rgba(255,255,255,0.06);
+
+        }
+
+
+        /* =================================================
+           BRAND
+        ================================================== */
+
+        .brand {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 11px;
+
+            color: #ffffff;
+
+        }
+
+
+        .brand:hover {
+            color: #ffffff;
+        }
+
+
+        .brand-icon {
+
+            width: 40px;
+
+            height: 40px;
+
+            border-radius: 11px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            background: #ffffff;
+
+            color: #111827;
+
+            font-size: 23px;
+
+            flex-shrink: 0;
+
+        }
+
+
+        .brand-text {
+
+            display: flex;
+
+            flex-direction: column;
+
+            line-height: 1;
+
+        }
+
+
+        .brand-title {
+
+            font-size: 17px;
+
+            font-weight: 800;
+
+            letter-spacing: -0.3px;
+
+        }
+
+
+        .brand-subtitle {
+
+            font-size: 10px;
+
+            color: #94a3b8;
+
+            margin-top: 4px;
+
+            text-transform: uppercase;
+
+            letter-spacing: 1.3px;
+
+        }
+
+
+        /* =================================================
+           SIDEBAR CLOSE
+        ================================================== */
+
+        .sidebar-close {
+
+            display: none;
+
+            width: 34px;
+
+            height: 34px;
+
+            border: 0;
+
+            background: transparent;
+
+            color: #94a3b8;
+
+            align-items: center;
+
+            justify-content: center;
+
+            border-radius: 8px;
+
+            cursor: pointer;
+
+        }
+
+
+        .sidebar-close:hover {
+
+            background:
+                rgba(255,255,255,0.08);
+
+            color: #ffffff;
+
+        }
+
+
+        /* =================================================
+           SIDEBAR NAV
+        ================================================== */
+
+        .sidebar-nav {
+
+            flex: 1;
+
+            overflow-y: auto;
+
+            padding:
+                18px 12px;
+
+        }
+
+
+        .sidebar-nav::-webkit-scrollbar {
+            width: 4px;
+        }
+
+
+        .sidebar-nav::-webkit-scrollbar-thumb {
+
+            background:
+                rgba(255,255,255,0.12);
+
+            border-radius: 10px;
+
+        }
+
+
+        .nav-section-title {
+
+            color:
+                rgba(148,163,184,0.65);
+
+            font-size: 10px;
+
+            font-weight: 700;
+
+            letter-spacing: 1.2px;
+
+            padding:
+                12px 12px 7px;
+
+        }
+
+
+        .nav-link {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+
+            width: 100%;
+
+            color: var(--sidebar-text);
+
+            padding:
+                10px 12px;
+
+            border-radius: 9px;
+
+            margin-bottom: 3px;
+
+            font-size: 13px;
+
+            font-weight: 500;
+
+            transition:
+                background 0.18s ease,
+                color 0.18s ease,
+                transform 0.18s ease;
+
+        }
+
+
+        .nav-link i {
+
+            width: 19px;
+
+            text-align: center;
+
+            font-size: 16px;
+
+            color: #94a3b8;
+
+        }
+
+
+        .nav-link:hover {
+
+            background:
+                var(--sidebar-hover);
+
+            color: #ffffff;
+
+        }
+
+
+        .nav-link:hover i {
+
+            color: #ffffff;
+
+        }
+
+
+        .nav-link.active {
+
+            background:
+                rgba(255,255,255,0.10);
+
+            color:
+                var(--sidebar-active);
+
+            font-weight: 600;
+
+        }
+
+
+        .nav-link.active i {
+
+            color: #ffffff;
+
+        }
+
+
+        /* =================================================
+           SIDEBAR USER
+        ================================================== */
+
+        .sidebar-user {
+
+            padding:
+                13px;
+
+            border-top:
+                1px solid
+                rgba(255,255,255,0.06);
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+        }
+
+
+        .user-avatar {
+
+            width: 38px;
+
+            height: 38px;
+
+            border-radius: 10px;
+
+            background:
+                rgba(255,255,255,0.10);
+
+            color: #ffffff;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-weight: 700;
+
+            font-size: 14px;
+
+            flex-shrink: 0;
+
+        }
+
+
+        .user-info {
+
+            flex: 1;
+
+            min-width: 0;
+
+        }
+
+
+        .user-name {
+
+            color: #ffffff;
+
+            font-size: 13px;
+
+            font-weight: 600;
+
+            white-space: nowrap;
+
+            overflow: hidden;
+
+            text-overflow: ellipsis;
+
+        }
+
+
+        .user-role {
+
+            color: #94a3b8;
+
+            font-size: 10px;
+
+            margin-top: 2px;
+
+        }
+
+
+        .user-logout {
+
+            width: 34px;
+
+            height: 34px;
+
+            border: 0;
+
+            background: transparent;
+
+            color: #94a3b8;
+
+            border-radius: 8px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            cursor: pointer;
+
+        }
+
+
+        .user-logout:hover {
+
+            background:
+                rgba(239,68,68,0.15);
+
+            color: #f87171;
+
+        }
+
+
+        /* =================================================
+           MAIN CONTENT
+        ================================================== */
+
+        .main-content {
+
+            width: calc(
+                100% - var(--sidebar-width)
+            );
+
+            min-height: 100vh;
+
+            margin-left:
+                var(--sidebar-width);
+
+            display: flex;
+
+            flex-direction: column;
+
+        }
+
+
+        /* =================================================
+           TOPBAR
+        ================================================== */
+
+        .topbar {
+
+            height: var(--topbar-height);
+
+            min-height: var(--topbar-height);
+
+            background: #ffffff;
+
+            border-bottom:
+                1px solid
+                var(--border);
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            padding:
+                0 28px;
+
+            position: sticky;
+
+            top: 0;
+
+            z-index: 1000;
+
+        }
+
+
+        .topbar-left {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 15px;
+
+            min-width: 0;
+
+        }
+
+
+        .menu-toggle {
+
+            display: none;
+
+            width: 40px;
+
+            height: 40px;
+
+            border:
+                1px solid
+                var(--border);
+
+            background: #ffffff;
+
+            border-radius: 9px;
+
+            color: #334155;
+
+            font-size: 20px;
+
+            align-items: center;
+
+            justify-content: center;
+
+            cursor: pointer;
+
+        }
+
+
+        .menu-toggle:hover {
+
+            background: #f8fafc;
+
+        }
+
+
+        .page-heading {
+
+            min-width: 0;
+
+        }
+
+
+        .page-heading h1 {
+
+            margin: 0;
+
+            font-size: 19px;
+
+            font-weight: 700;
+
+            color: #0f172a;
+
+            line-height: 1.2;
+
+        }
+
+
+        .page-heading p {
+
+            margin: 4px 0 0;
+
+            color: #94a3b8;
+
+            font-size: 12px;
+
+        }
+
+
+        /* =================================================
+           TOPBAR RIGHT
+        ================================================== */
+
+        .topbar-right {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 14px;
+
+        }
+
+
+        .live-status {
+
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 7px;
+
+            color: #64748b;
+
+            font-size: 12px;
+
+            font-weight: 500;
+
+        }
+
+
+        .live-dot {
+
+            width: 7px;
+
+            height: 7px;
+
+            background: var(--success);
+
+            border-radius: 50%;
+
+            display: inline-block;
+
+            box-shadow:
+                0 0 0 3px
+                rgba(16,185,129,0.12);
+
+        }
+
+
+        .topbar-icon {
+
+            width: 38px;
+
+            height: 38px;
+
+            border:
+                1px solid
+                var(--border);
+
+            background: #ffffff;
+
+            border-radius: 9px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            color: #64748b;
+
+            cursor: pointer;
+
+            font-size: 16px;
+
+        }
+
+
+        .topbar-icon:hover {
+
+            background: #f8fafc;
+
+            color: #111827;
+
+        }
+
+
+        .topbar-user {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+        }
+
+
+        .topbar-avatar {
+
+            width: 36px;
+
+            height: 36px;
+
+            border-radius: 9px;
+
+            background: #111827;
+
+            color: #ffffff;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 13px;
+
+            font-weight: 700;
+
+        }
+
+
+        .topbar-user-name {
+
+            max-width: 130px;
+
+            color: #334155;
+
+            font-size: 13px;
+
+            font-weight: 600;
+
+            white-space: nowrap;
+
+            overflow: hidden;
+
+            text-overflow: ellipsis;
+
+        }
+
+
+        /* =================================================
+           CONTENT
+        ================================================== */
+
+        .content-wrapper {
+
+            flex: 1;
+
+            padding: 28px;
+
+        }
+
+
+        /* =================================================
+           DJANGO MESSAGES
+        ================================================== */
+
+        .messages-container {
+
+            padding:
+                18px 28px 0;
+
+        }
+
+
+        .messages-container .alert {
+
+            border-radius: 10px;
+
+            border-width: 1px;
+
+            font-size: 13px;
+
+            margin-bottom: 8px;
+
+        }
+
+
+        /* =================================================
+           FOOTER
+        ================================================== */
+
+        .footer {
+
+            padding:
+                18px 28px;
+
+            border-top:
+                1px solid
+                var(--border);
+
+            color: #94a3b8;
+
+            font-size: 11px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            gap: 15px;
+
+        }
+
+
+        /* =================================================
+           SIDEBAR OVERLAY
+        ================================================== */
+
+        .sidebar-overlay {
+
+            display: none;
+
+            position: fixed;
+
+            inset: 0;
+
+            background:
+                rgba(15,23,42,0.55);
+
+            z-index: 1040;
+
+            opacity: 0;
+
+            transition: opacity 0.2s ease;
+
+        }
+
+
+        .sidebar-overlay.show {
+
+            display: block;
+
+            opacity: 1;
+
+        }
+
+
+        /* =================================================
+           CUSTOM SCROLLBAR
+        ================================================== */
+
+        ::-webkit-scrollbar {
+
+            width: 7px;
+
+            height: 7px;
+
+        }
+
+
+        ::-webkit-scrollbar-track {
+
+            background: #f8fafc;
+
+        }
+
+
+        ::-webkit-scrollbar-thumb {
+
+            background: #cbd5e1;
+
+            border-radius: 10px;
+
+        }
+
+
+        ::-webkit-scrollbar-thumb:hover {
+
+            background: #94a3b8;
+
+        }
+
+
+        /* =================================================
+           MOBILE
+        ================================================== */
+
+        @media (max-width: 991.98px) {
+
+            .sidebar {
+
+                transform:
+                    translateX(-100%);
+
+                transition:
+                    transform 0.25s ease;
+
+                box-shadow:
+                    15px 0 40px
+                    rgba(15,23,42,0.20);
+
+            }
+
+
+            .sidebar.open {
+
+                transform:
+                    translateX(0);
+
+            }
+
+
+            .sidebar-close {
+
+                display: flex;
+
+            }
+
+
+            .main-content {
+
+                width: 100%;
+
+                margin-left: 0;
+
+            }
+
+
+            .menu-toggle {
+
+                display: flex;
+
+            }
+
+
+            .topbar {
+
+                padding:
+                    0 18px;
+
+            }
+
+
+            .content-wrapper {
+
+                padding: 20px;
+
+            }
+
+
+            .messages-container {
+
+                padding:
+                    15px 20px 0;
+
+            }
+
+
+            .footer {
+
+                padding:
+                    16px 20px;
+
+            }
+
+        }
+
+
+        /* =================================================
+           SMALL MOBILE
+        ================================================== */
+
+        @media (max-width: 575.98px) {
+
+            .topbar {
+
+                height: 64px;
+
+                min-height: 64px;
+
+            }
+
+
+            .topbar-right .live-status {
+
+                display: none;
+
+            }
+
+
+            .topbar-user-name {
+
+                display: none;
+
+            }
+
+
+            .page-heading h1 {
+
+                font-size: 17px;
+
+            }
+
+
+            .page-heading p {
+
+                display: none;
+
+            }
+
+
+            .content-wrapper {
+
+                padding: 15px;
+
+            }
+
+
+            .messages-container {
+
+                padding:
+                    12px 15px 0;
+
+            }
+
+
+            .footer {
+
+                padding:
+                    15px;
+
+                flex-direction: column;
+
+                align-items: flex-start;
+
+            }
+
+        }
+
+
+        /* =================================================
+           FOCUS
+        ================================================== */
+
+        button:focus-visible,
+        a:focus-visible,
+        input:focus-visible,
+        select:focus-visible,
+        textarea:focus-visible {
+
+            outline:
+                2px solid
+                #3b82f6;
+
+            outline-offset: 2px;
+
+        }
+
+    </style>
+
+
+    {% block extra_css %}
+    {% endblock %}
+
+</head>
+
+
+<body>
+
+
+<div class="app-wrapper">
+
+
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
+    <aside
+        class="sidebar"
+        id="sidebar"
+    >
+
+
+        <!-- =================================================
+             SIDEBAR HEADER
+        ================================================== -->
+
+        <div class="sidebar-header">
+
+
+            <a
+                href="{% url 'streaming:dashboard' %}"
+                class="brand"
+            >
+
+                <div class="brand-icon">
+
+                    <i class="bi bi-play-fill"></i>
+
+                </div>
+
+
+                <div class="brand-text">
+
+                    <span class="brand-title">
+                        Stream
+                    </span>
+
+                    <span class="brand-subtitle">
+                        Studio
+                    </span>
+
+                </div>
+
+            </a>
+
+
+            <!-- Mobile close button -->
+
+            <button
+                type="button"
+                class="sidebar-close"
+                id="sidebarClose"
+                aria-label="Close menu"
+            >
+
+                <i class="bi bi-x-lg"></i>
+
+            </button>
+
+        </div>
+
+
+        <!-- =================================================
+             SIDEBAR NAVIGATION
+        ================================================== -->
+
+        <nav class="sidebar-nav">
+
+
+            <!-- MAIN -->
+
+            <div class="nav-section-title">
+                MAIN
+            </div>
+
+
+            <a
+                href="{% url 'streaming:dashboard' %}"
+                class="nav-link
+                {% if request.resolver_match.url_name == 'dashboard' %}
+                    active
+                {% endif %}"
+            >
+
+                <i class="bi bi-grid-1x2-fill"></i>
+
+                <span>
+                    Dashboard
+                </span>
+
+            </a>
+
+
+            <!-- CONTENT -->
+
+            <div class="nav-section-title">
+                CONTENT
+            </div>
+
+
+            <a
+                href="{% url 'streaming:video_list' %}"
+                class="nav-link
+                {% if request.resolver_match.url_name == 'video_list' or request.resolver_match.url_name == 'video_detail' %}
+                    active
+                {% endif %}"
+            >
+
+                <i class="bi bi-collection-play-fill"></i>
+
+                <span>
+                    Videos
+                </span>
+
+            </a>
+
+
+            <a
+                href="{% url 'streaming:video_upload' %}"
+                class="nav-link
+                {% if request.resolver_match.url_name == 'video_upload' %}
+                    active
+                {% endif %}"
+            >
+
+                <i class="bi bi-cloud-arrow-up-fill"></i>
+
+                <span>
+                    Upload Video
+                </span>
+
+            </a>
+
+
+            <a
+                href="{% url 'streaming:playlist_list' %}"
+                class="nav-link
+                {% if 'playlist' in request.resolver_match.url_name %}
+                    active
+                {% endif %}"
+            >
+
+                <i class="bi bi-list-ul"></i>
+
+                <span>
+                    Playlists
+                </span>
+
+            </a>
+
+
+            <!-- STREAMING -->
+
+            <div class="nav-section-title">
+                STREAMING
+            </div>
+
+
+            <a
+                href="{% url 'streaming:session_list' %}"
+                class="nav-link
+                {% if 'session' in request.resolver_match.url_name %}
+                    active
+                {% endif %}"
+            >
+
+                <i class="bi bi-broadcast-pin"></i>
+
+                <span>
+                    Live Streams
+                </span>
+
+            </a>
+
+
+            <a
+                href="{% url 'streaming:session_create' %}"
+                class="nav-link"
+            >
+
+                <i class="bi bi-plus-circle-fill"></i>
+
+                <span>
+                    Create Stream
+                </span>
+
+            </a>
+
+
+          
+
+
+            <!-- SYSTEM -->
+
+            <div class="nav-section-title">
+                SYSTEM
+            </div>
+
+
+            <a
+                href="{% url 'admin:index' %}"
+                class="nav-link"
+                target="_blank"
+            >
+
+                <i class="bi bi-gear-fill"></i>
+
+                <span>
+                    Admin Panel
+                </span>
+
+            </a>
+
+
+        </nav>
+
+
+        <!-- =================================================
+             SIDEBAR USER
+        ================================================== -->
+
+        <div class="sidebar-user">
+
+
+            <div class="user-avatar">
+
+                {% if user.is_authenticated %}
+
+                    {{ user.username|first|upper }}
+
+                {% else %}
+
+                    G
+
+                {% endif %}
+
+            </div>
+
+
+            <div class="user-info">
+
+                {% if user.is_authenticated %}
+
+                    <div class="user-name">
+
+                        {{ user.username }}
+
+                    </div>
+
+                    <div class="user-role">
+
+                        Streaming User
+
+                    </div>
+
+                {% else %}
+
+                    <div class="user-name">
+                        Guest
+                    </div>
+
+                    <div class="user-role">
+                        Visitor
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+
+            {% if user.is_authenticated %}
+
+                <form
+                    method="post"
+                    action="{% url 'admin:logout' %}"
+                >
+
+                    {% csrf_token %}
+
+                    <button
+                        type="submit"
+                        class="user-logout"
+                        title="Logout"
+                        aria-label="Logout"
+                    >
+
+                        <i class="bi bi-box-arrow-right"></i>
+
+                    </button>
+
+                </form>
+
+            {% endif %}
+
+
+        </div>
+
+
+    </aside>
+
+
+    <!-- =====================================================
+         MOBILE OVERLAY
+    ====================================================== -->
+
+    <div
+        class="sidebar-overlay"
+        id="sidebarOverlay"
+    ></div>
+
+
+    <!-- =====================================================
+         MAIN
+    ====================================================== -->
+
+    <main class="main-content">
+
+
+        <!-- =================================================
+             TOPBAR
+        ================================================== -->
+
+        <header class="topbar">
+
+
+            <div class="topbar-left">
+
+
+                <button
+                    type="button"
+                    class="menu-toggle"
+                    id="menuToggle"
+                    aria-label="Open menu"
+                >
+
+                    <i class="bi bi-list"></i>
+
+                </button>
+
+
+                <div class="page-heading">
+
+                    <h1>
+
+                        {% block page_title %}
+
+                            Dashboard
+
+                        {% endblock %}
+
+                    </h1>
+
+
+                    <p>
+
+                        {% block page_subtitle %}
+
+                            Manage your videos and live streams
+
+                        {% endblock %}
+
+                    </p>
+
+                </div>
+
+
+            </div>
+
+
+            <!-- TOPBAR RIGHT -->
+
+            <div class="topbar-right">
+
+
+                <!-- System status -->
+
+                <div class="live-status">
+
+                    <span class="live-dot"></span>
+
+                    <span>
+                        System Online
+                    </span>
+
+                </div>
+
+
+                <!-- Notifications -->
+
+                <button
+                    type="button"
+                    class="topbar-icon"
+                    title="Notifications"
+                >
+
+                    <i class="bi bi-bell"></i>
+
+                </button>
+
+
+                <!-- User -->
+
+                {% if user.is_authenticated %}
+
+                    <div class="topbar-user">
+
+                        <div class="topbar-avatar">
+
+                            {{ user.username|first|upper }}
+
+                        </div>
+
+
+                        <div class="topbar-user-name">
+
+                            {{ user.username }}
+
+                        </div>
+
+                    </div>
+
+                {% endif %}
+
+
+            </div>
+
+
+        </header>
+
+
+        <!-- =================================================
+             DJANGO MESSAGES
+        ================================================== -->
+
+        {% if messages %}
+
+            <div class="messages-container">
+
+                {% for message in messages %}
+
+                    <div
+                        class="
+                            alert
+                            {% if message.tags == 'error' %}
+                                alert-danger
+                            {% elif message.tags == 'success' %}
+                                alert-success
+                            {% elif message.tags == 'warning' %}
+                                alert-warning
+                            {% else %}
+                                alert-info
+                            {% endif %}
+                            alert-dismissible
+                            fade
+                            show
+                        "
+                        role="alert"
+                    >
+
+
+                        {% if message.tags == "success" %}
+
+                            <i
+                                class="bi bi-check-circle-fill me-2"
+                            ></i>
+
+                        {% elif message.tags == "error" %}
+
+                            <i
+                                class="bi bi-exclamation-triangle-fill me-2"
+                            ></i>
+
+                        {% elif message.tags == "warning" %}
+
+                            <i
+                                class="bi bi-exclamation-circle-fill me-2"
+                            ></i>
+
+                        {% else %}
+
+                            <i
+                                class="bi bi-info-circle-fill me-2"
+                            ></i>
+
+                        {% endif %}
+
+
+                        {{ message }}
+
+
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="alert"
+                            aria-label="Close"
+                        ></button>
+
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% endif %}
+
+
+        <!-- =================================================
+             CONTENT
+        ================================================== -->
+
+        <section class="content-wrapper">
+
+            {% block content %}
+
+            {% endblock %}
+
+        </section>
+
+
+        <!-- =================================================
+             FOOTER
+        ================================================== -->
+
+        <footer class="footer">
+
+            <div>
+
+                © {% now "Y" %} Stream Studio
+
+            </div>
+
+
+            <div>
+
+                Video Streaming Platform
+
+            </div>
+
+        </footer>
+
+
+    </main>
+
+
+</div>
+
+
+<!-- =========================================================
+     BOOTSTRAP JAVASCRIPT
+========================================================== -->
+
+<script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+></script>
+
+
+<!-- =========================================================
+     ALL CUSTOM JAVASCRIPT
+     NO main.js REQUIRED
+========================================================== -->
+
+<script>
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+
+            /* ===============================================
+               ELEMENTS
+            ================================================ */
+
+            const menuToggle =
+                document.getElementById(
+                    "menuToggle"
+                );
+
+            const sidebar =
+                document.getElementById(
+                    "sidebar"
+                );
+
+            const sidebarClose =
+                document.getElementById(
+                    "sidebarClose"
+                );
+
+            const sidebarOverlay =
+                document.getElementById(
+                    "sidebarOverlay"
+                );
+
+
+            /* ===============================================
+               OPEN SIDEBAR
+            ================================================ */
+
+            function openSidebar() {
+
+                if (!sidebar) {
+                    return;
+                }
+
+                sidebar.classList.add(
+                    "open"
+                );
+
+                if (sidebarOverlay) {
+
+                    sidebarOverlay.classList.add(
+                        "show"
+                    );
+
+                }
+
+                document.body.style.overflow =
+                    "hidden";
+
+            }
+
+
+            /* ===============================================
+               CLOSE SIDEBAR
+            ================================================ */
+
+            function closeSidebar() {
+
+                if (!sidebar) {
+                    return;
+                }
+
+                sidebar.classList.remove(
+                    "open"
+                );
+
+                if (sidebarOverlay) {
+
+                    sidebarOverlay.classList.remove(
+                        "show"
+                    );
+
+                }
+
+                document.body.style.overflow =
+                    "";
+
+            }
+
+
+            /* ===============================================
+               MENU BUTTON
+            ================================================ */
+
+            if (menuToggle) {
+
+                menuToggle.addEventListener(
+                    "click",
+                    openSidebar
+                );
+
+            }
+
+
+            /* ===============================================
+               CLOSE BUTTON
+            ================================================ */
+
+            if (sidebarClose) {
+
+                sidebarClose.addEventListener(
+                    "click",
+                    closeSidebar
+                );
+
+            }
+
+
+            /* ===============================================
+               OVERLAY
+            ================================================ */
+
+            if (sidebarOverlay) {
+
+                sidebarOverlay.addEventListener(
+                    "click",
+                    closeSidebar
+                );
+
+            }
+
+
+            /* ===============================================
+               CLOSE AFTER NAVIGATION
+               ON MOBILE
+            ================================================ */
+
+            if (sidebar) {
+
+                const sidebarLinks =
+                    sidebar.querySelectorAll(
+                        "a.nav-link"
+                    );
+
+                sidebarLinks.forEach(
+                    function (link) {
+
+                        link.addEventListener(
+                            "click",
+                            function () {
+
+                                if (
+                                    window.innerWidth <= 991
+                                ) {
+
+                                    closeSidebar();
+
+                                }
+
+                            }
+                        );
+
+                    }
+                );
+
+            }
+
+
+            /* ===============================================
+               ESCAPE KEY
+            ================================================ */
+
+            document.addEventListener(
+                "keydown",
+                function (event) {
+
+                    if (
+                        event.key === "Escape"
+                    ) {
+
+                        closeSidebar();
+
+                    }
+
+                }
+            );
+
+
+            /* ===============================================
+               WINDOW RESIZE
+            ================================================ */
+
+            window.addEventListener(
+                "resize",
+                function () {
+
+                    if (
+                        window.innerWidth > 991
+                    ) {
+
+                        closeSidebar();
+
+                    }
+
+                }
+            );
+
+
+            /* ===============================================
+               AUTO HIDE DJANGO MESSAGES
+            ================================================ */
+
+            const alerts =
+                document.querySelectorAll(
+                    ".messages-container .alert"
+                );
+
+
+            alerts.forEach(
+                function (alert) {
+
+                    setTimeout(
+                        function () {
+
+                            try {
+
+                                const bsAlert =
+                                    bootstrap.Alert
+                                    .getOrCreateInstance(
+                                        alert
+                                    );
+
+                                bsAlert.close();
+
+                            }
+                            catch (error) {
+
+                                alert.remove();
+
+                            }
+
+                        },
+                        5000
+                    );
+
+                }
+            );
+
+
+        }
+    );
+
+</script>
+
+
+<!-- =========================================================
+     PAGE-SPECIFIC JAVASCRIPT
+========================================================== -->
+
+{% block extra_js %}
+{% endblock %}
+
+
+</body>
+
+</html>

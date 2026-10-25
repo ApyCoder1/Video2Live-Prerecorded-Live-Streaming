@@ -1,0 +1,1875 @@
+{% extends "streaming/base.html" %}
+
+{% block title %}
+    Upload Video | Stream Studio
+{% endblock %}
+
+{% block page_title %}
+    Upload Video
+{% endblock %}
+
+{% block page_subtitle %}
+    Add a video to your streaming library
+{% endblock %}
+
+
+{% block extra_css %}
+
+<style>
+
+    /* =====================================================
+       UPLOAD PAGE
+    ====================================================== */
+
+    .upload-page {
+        width: 100%;
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+
+
+    /* =====================================================
+       HEADER
+    ====================================================== */
+
+    .upload-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        margin-bottom: 24px;
+    }
+
+    .upload-heading h2 {
+        margin: 0;
+        font-size: 21px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .upload-heading p {
+        margin: 5px 0 0;
+        color: #94a3b8;
+        font-size: 13px;
+    }
+
+    .back-videos-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 9px 14px;
+        border: 1px solid #e2e8f0;
+        border-radius: 9px;
+        background: #ffffff;
+        color: #475569;
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .back-videos-btn:hover {
+        background: #f8fafc;
+        color: #111827;
+    }
+
+
+    /* =====================================================
+       MAIN GRID
+    ====================================================== */
+
+    .upload-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 320px;
+        gap: 22px;
+        align-items: start;
+    }
+
+
+    /* =====================================================
+       CARD
+    ====================================================== */
+
+    .upload-card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .upload-card-header {
+        padding: 18px 20px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .upload-card-title {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 700;
+        color: #111827;
+    }
+
+    .upload-card-subtitle {
+        margin: 4px 0 0;
+        color: #94a3b8;
+        font-size: 11px;
+    }
+
+    .upload-card-body {
+        padding: 22px;
+    }
+
+
+    /* =====================================================
+       FORM
+    ====================================================== */
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-label-custom {
+        display: block;
+        color: #334155;
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 7px;
+    }
+
+    .required-star {
+        color: #ef4444;
+    }
+
+    .form-control-custom,
+    .form-select-custom {
+        width: 100%;
+        height: 43px;
+        border: 1px solid #dbe2ea;
+        border-radius: 9px;
+        background: #ffffff;
+        color: #334155;
+        font-size: 13px;
+        padding: 0 12px;
+        outline: none;
+        transition: 0.15s;
+    }
+
+    textarea.form-control-custom {
+        height: auto;
+        min-height: 110px;
+        resize: vertical;
+        padding: 11px 12px;
+        line-height: 1.5;
+    }
+
+    .form-control-custom:focus,
+    .form-select-custom:focus {
+        border-color: #94a3b8;
+        box-shadow:
+            0 0 0 3px
+            rgba(148,163,184,0.12);
+    }
+
+    .form-help {
+        margin-top: 6px;
+        color: #94a3b8;
+        font-size: 11px;
+        line-height: 1.5;
+    }
+
+
+    /* =====================================================
+       VIDEO DROPZONE
+    ====================================================== */
+
+    .upload-dropzone {
+        position: relative;
+        width: 100%;
+        min-height: 250px;
+        border: 2px dashed #cbd5e1;
+        border-radius: 14px;
+        background: #f8fafc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 30px;
+        cursor: pointer;
+        transition:
+            border-color 0.2s ease,
+            background 0.2s ease;
+    }
+
+    .upload-dropzone:hover {
+        border-color: #64748b;
+        background: #f1f5f9;
+    }
+
+    .upload-dropzone.dragover {
+        border-color: #111827;
+        background: #f1f5f9;
+    }
+
+    .upload-file-input {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    .upload-drop-content {
+        pointer-events: none;
+    }
+
+    .upload-icon {
+        width: 65px;
+        height: 65px;
+        margin: 0 auto 14px;
+        border-radius: 17px;
+        background: #e2e8f0;
+        color: #475569;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 29px;
+    }
+
+    .upload-drop-title {
+        color: #334155;
+        font-size: 15px;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+    .upload-drop-text {
+        color: #94a3b8;
+        font-size: 12px;
+        margin-bottom: 12px;
+    }
+
+    .upload-drop-format {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 9px;
+        border-radius: 7px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        color: #64748b;
+        font-size: 10px;
+        font-weight: 600;
+    }
+
+
+    /* =====================================================
+       SELECTED FILE
+    ====================================================== */
+
+    .selected-file {
+        display: none;
+        margin-top: 12px;
+        padding: 12px;
+        border: 1px solid #dbeafe;
+        background: #eff6ff;
+        border-radius: 10px;
+    }
+
+    .selected-file.show {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .selected-file-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 8px;
+        background: #dbeafe;
+        color: #2563eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .selected-file-info {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .selected-file-name {
+        color: #1e3a8a;
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .selected-file-size {
+        color: #60a5fa;
+        font-size: 10px;
+        margin-top: 2px;
+    }
+
+
+    /* =====================================================
+       THUMBNAIL
+    ====================================================== */
+
+    .thumbnail-upload {
+        position: relative;
+        width: 100%;
+        height: 180px;
+        border: 2px dashed #cbd5e1;
+        border-radius: 12px;
+        background: #f8fafc;
+        overflow: hidden;
+        cursor: pointer;
+    }
+
+    .thumbnail-upload:hover {
+        border-color: #64748b;
+        background: #f1f5f9;
+    }
+
+    .thumbnail-upload.has-image {
+        border-style: solid;
+        border-color: #e2e8f0;
+    }
+
+    .thumbnail-input {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+        z-index: 5;
+    }
+
+    .thumbnail-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        color: #94a3b8;
+        pointer-events: none;
+    }
+
+    .thumbnail-placeholder i {
+        font-size: 32px;
+        margin-bottom: 8px;
+        color: #64748b;
+    }
+
+    .thumbnail-placeholder span {
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .thumbnail-preview {
+        display: none;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .thumbnail-upload.has-image .thumbnail-preview {
+        display: block;
+    }
+
+    .thumbnail-upload.has-image .thumbnail-placeholder {
+        display: none;
+    }
+
+
+    /* =====================================================
+       VISIBILITY
+    ====================================================== */
+
+    .visibility-card {
+        border: 1px solid #e2e8f0;
+        border-radius: 11px;
+        padding: 13px;
+        background: #f8fafc;
+    }
+
+    .visibility-row {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+    }
+
+    .visibility-checkbox {
+        width: 18px;
+        height: 18px;
+        accent-color: #111827;
+        cursor: pointer;
+    }
+
+    .visibility-icon {
+        width: 35px;
+        height: 35px;
+        border-radius: 8px;
+        background: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #64748b;
+        flex-shrink: 0;
+    }
+
+    .visibility-text {
+        flex: 1;
+    }
+
+    .visibility-title {
+        color: #334155;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .visibility-description {
+        color: #94a3b8;
+        font-size: 10px;
+        margin-top: 2px;
+    }
+
+
+    /* =====================================================
+       SUBMIT
+    ====================================================== */
+
+    .upload-submit-area {
+        padding-top: 4px;
+    }
+
+    .upload-submit {
+        width: 100%;
+        height: 45px;
+        border: 0;
+        border-radius: 9px;
+        background: #111827;
+        color: #ffffff;
+        font-size: 13px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .upload-submit:hover {
+        background: #1f2937;
+    }
+
+    .upload-submit:disabled {
+        opacity: 0.65;
+        cursor: not-allowed;
+    }
+
+
+    /* =====================================================
+       SIDE INFO
+    ====================================================== */
+
+    .info-card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        overflow: hidden;
+        margin-bottom: 18px;
+    }
+
+    .info-card:last-child {
+        margin-bottom: 0;
+    }
+
+    .info-card-header {
+        padding: 16px 18px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .info-card-header h3 {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 700;
+        color: #111827;
+    }
+
+    .info-card-body {
+        padding: 17px 18px;
+    }
+
+
+    /* =====================================================
+       REQUIREMENTS
+    ====================================================== */
+
+    .requirement {
+        display: flex;
+        align-items: flex-start;
+        gap: 9px;
+        margin-bottom: 13px;
+    }
+
+    .requirement:last-child {
+        margin-bottom: 0;
+    }
+
+    .requirement-icon {
+        width: 20px;
+        height: 20px;
+        border-radius: 6px;
+        background: #ecfdf5;
+        color: #059669;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 11px;
+    }
+
+    .requirement-text {
+        color: #64748b;
+        font-size: 11px;
+        line-height: 1.5;
+    }
+
+
+    /* =====================================================
+       STREAM INFO
+    ====================================================== */
+
+    .stream-info {
+        background: #f8fafc;
+        border-radius: 10px;
+        padding: 12px;
+    }
+
+    .stream-info-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 7px 0;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .stream-info-row:last-child {
+        border-bottom: 0;
+    }
+
+    .stream-info-label {
+        color: #94a3b8;
+        font-size: 10px;
+    }
+
+    .stream-info-value {
+        color: #475569;
+        font-size: 10px;
+        font-weight: 600;
+        text-align: right;
+    }
+
+
+    /* =====================================================
+       ALERT
+    ====================================================== */
+
+    .upload-error {
+        display: none;
+        margin-bottom: 18px;
+        padding: 12px 14px;
+        border-radius: 9px;
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #b91c1c;
+        font-size: 12px;
+    }
+
+    .upload-error.show {
+        display: block;
+    }
+
+
+    /* =====================================================
+       PROGRESS
+    ====================================================== */
+
+    .upload-progress {
+        display: none;
+        margin-top: 14px;
+    }
+
+    .upload-progress.show {
+        display: block;
+    }
+
+    .upload-progress-header {
+        display: flex;
+        justify-content: space-between;
+        color: #64748b;
+        font-size: 11px;
+        margin-bottom: 6px;
+    }
+
+    .upload-progress-bar {
+        height: 6px;
+        background: #e2e8f0;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .upload-progress-value {
+        height: 100%;
+        width: 0%;
+        background: #111827;
+        border-radius: 10px;
+        transition: width 0.2s ease;
+    }
+
+
+    /* =====================================================
+       RESPONSIVE
+    ====================================================== */
+
+    @media (max-width: 991px) {
+
+        .upload-grid {
+            grid-template-columns: 1fr;
+        }
+
+    }
+
+
+    @media (max-width: 600px) {
+
+        .upload-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .back-videos-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .upload-card-body {
+            padding: 16px;
+        }
+
+        .upload-dropzone {
+            min-height: 210px;
+            padding: 20px;
+        }
+
+    }
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="upload-page">
+
+
+    <!-- =====================================================
+         PAGE HEADER
+    ====================================================== -->
+
+    <div class="upload-header">
+
+        <div class="upload-heading">
+
+            <h2>
+                Upload New Video
+            </h2>
+
+            <p>
+                Add a video to your streaming library.
+            </p>
+
+        </div>
+
+
+        <a
+            href="{% url 'streaming:video_list' %}"
+            class="back-videos-btn"
+        >
+
+            <i class="bi bi-arrow-left"></i>
+
+            Back to Videos
+
+        </a>
+
+    </div>
+
+
+    <!-- =====================================================
+         ERROR
+    ====================================================== -->
+
+    <div
+        id="uploadError"
+        class="upload-error"
+    ></div>
+
+
+    <!-- =====================================================
+         GRID
+    ====================================================== -->
+
+    <div class="upload-grid">
+
+
+        <!-- =================================================
+             MAIN FORM
+        ================================================== -->
+
+        <div class="upload-card">
+
+
+            <div class="upload-card-header">
+
+                <h3 class="upload-card-title">
+                    Video Information
+                </h3>
+
+                <p class="upload-card-subtitle">
+                    Provide the information needed for your video.
+                </p>
+
+            </div>
+
+
+            <div class="upload-card-body">
+
+
+                <form
+                    method="post"
+                    enctype="multipart/form-data"
+                    id="videoUploadForm"
+                >
+
+                    {% csrf_token %}
+
+
+                    <!-- =====================================
+                         VIDEO FILE
+                    ====================================== -->
+
+                    <div class="form-group">
+
+                        <label class="form-label-custom">
+
+                            Video File
+
+                            <span class="required-star">
+                                *
+                            </span>
+
+                        </label>
+
+
+                        <div
+                            class="upload-dropzone"
+                            id="videoDropzone"
+                        >
+
+                            <input
+                                type="file"
+                                name="video_file"
+                                id="videoFile"
+                                class="upload-file-input"
+                                accept="video/mp4,video/webm,video/quicktime,video/x-matroska"
+                                required
+                            >
+
+
+                            <div class="upload-drop-content">
+
+                                <div class="upload-icon">
+
+                                    <i class="bi bi-cloud-arrow-up"></i>
+
+                                </div>
+
+
+                                <div class="upload-drop-title">
+
+                                    Drop your video here
+
+                                </div>
+
+
+                                <div class="upload-drop-text">
+
+                                    or click to browse from your computer
+
+                                </div>
+
+
+                                <div class="upload-drop-format">
+
+                                    <i class="bi bi-file-earmark-play"></i>
+
+                                    MP4 recommended
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Selected file -->
+
+                        <div
+                            class="selected-file"
+                            id="selectedFile"
+                        >
+
+                            <div class="selected-file-icon">
+
+                                <i class="bi bi-file-earmark-play"></i>
+
+                            </div>
+
+
+                            <div class="selected-file-info">
+
+                                <div
+                                    class="selected-file-name"
+                                    id="selectedFileName"
+                                ></div>
+
+                                <div
+                                    class="selected-file-size"
+                                    id="selectedFileSize"
+                                ></div>
+
+                            </div>
+
+
+                            <i
+                                class="bi bi-check-circle-fill text-success"
+                            ></i>
+
+                        </div>
+
+
+                        <div class="form-help">
+
+                            Recommended format:
+                            MP4 (H.264 video + AAC audio).
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =====================================
+                         TITLE
+                    ====================================== -->
+
+                    <div class="form-group">
+
+                        <label
+                            for="videoTitle"
+                            class="form-label-custom"
+                        >
+
+                            Video Title
+
+                            <span class="required-star">
+                                *
+                            </span>
+
+                        </label>
+
+
+                        <input
+                            type="text"
+                            name="title"
+                            id="videoTitle"
+                            class="form-control-custom"
+                            placeholder="Enter video title"
+                            maxlength="255"
+                            required
+                        >
+
+
+                        <div class="form-help">
+
+                            Use a clear name so you can easily
+                            identify this video in your playlists.
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =====================================
+                         DESCRIPTION
+                    ====================================== -->
+
+                    <div class="form-group">
+
+                        <label
+                            for="videoDescription"
+                            class="form-label-custom"
+                        >
+
+                            Description
+
+                        </label>
+
+
+                        <textarea
+                            name="description"
+                            id="videoDescription"
+                            class="form-control-custom"
+                            placeholder="Enter a description for this video..."
+                            rows="4"
+                        ></textarea>
+
+
+                        <div class="form-help">
+
+                            Optional. You can use this to describe
+                            the video content.
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =====================================
+                         THUMBNAIL
+                    ====================================== -->
+
+                    <div class="form-group">
+
+                        <label class="form-label-custom">
+
+                            Thumbnail
+
+                        </label>
+
+
+                        <div
+                            class="thumbnail-upload"
+                            id="thumbnailUpload"
+                        >
+
+                            <input
+                                type="file"
+                                name="thumbnail"
+                                id="thumbnailFile"
+                                class="thumbnail-input"
+                                accept="image/jpeg,image/png,image/webp"
+                            >
+
+
+                            <div class="thumbnail-placeholder">
+
+                                <i class="bi bi-image"></i>
+
+                                <span>
+                                    Click to select thumbnail
+                                </span>
+
+                            </div>
+
+
+                            <img
+                                id="thumbnailPreview"
+                                class="thumbnail-preview"
+                                alt="Thumbnail preview"
+                            >
+
+                        </div>
+
+
+                        <div class="form-help">
+
+                            Recommended size:
+                            1280 × 720 pixels.
+                            JPG, PNG or WebP.
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =====================================
+                         VISIBILITY
+                    ====================================== -->
+
+                    <div class="form-group">
+
+                        <label class="form-label-custom">
+
+                            Visibility
+
+                        </label>
+
+
+                        <div class="visibility-card">
+
+                            <label
+                                class="visibility-row"
+                                for="isPublic"
+                            >
+
+                                <input
+                                    type="checkbox"
+                                    name="is_public"
+                                    id="isPublic"
+                                    class="visibility-checkbox"
+                                >
+
+
+                                <div class="visibility-icon">
+
+                                    <i
+                                        class="bi bi-globe2"
+                                        id="visibilityIcon"
+                                    ></i>
+
+                                </div>
+
+
+                                <div class="visibility-text">
+
+                                    <div class="visibility-title">
+
+                                        Make video public
+
+                                    </div>
+
+                                    <div
+                                        class="visibility-description"
+                                        id="visibilityDescription"
+                                    >
+
+                                        This video can be used
+                                        publicly in your platform.
+
+                                    </div>
+
+                                </div>
+
+                            </label>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =====================================
+                         PROGRESS
+                    ====================================== -->
+
+                    <div
+                        class="upload-progress"
+                        id="uploadProgress"
+                    >
+
+                        <div class="upload-progress-header">
+
+                            <span>
+                                Uploading video...
+                            </span>
+
+                            <span id="uploadProgressText">
+                                0%
+                            </span>
+
+                        </div>
+
+
+                        <div class="upload-progress-bar">
+
+                            <div
+                                class="upload-progress-value"
+                                id="uploadProgressValue"
+                            ></div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =====================================
+                         SUBMIT
+                    ====================================== -->
+
+                    <div class="upload-submit-area">
+
+                        <button
+                            type="submit"
+                            class="upload-submit"
+                            id="uploadSubmit"
+                        >
+
+                            <i class="bi bi-cloud-arrow-up-fill"></i>
+
+                            Upload Video
+
+                        </button>
+
+                    </div>
+
+
+                </form>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             RIGHT INFORMATION
+        ================================================== -->
+
+        <div>
+
+
+            <!-- =============================================
+                 VIDEO REQUIREMENTS
+            ============================================== -->
+
+            <div class="info-card">
+
+                <div class="info-card-header">
+
+                    <h3>
+                        Video Requirements
+                    </h3>
+
+                </div>
+
+
+                <div class="info-card-body">
+
+
+                    <div class="requirement">
+
+                        <div class="requirement-icon">
+
+                            <i class="bi bi-check"></i>
+
+                        </div>
+
+                        <div class="requirement-text">
+
+                            MP4 format is recommended for
+                            reliable YouTube streaming.
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="requirement">
+
+                        <div class="requirement-icon">
+
+                            <i class="bi bi-check"></i>
+
+                        </div>
+
+                        <div class="requirement-text">
+
+                            Use H.264 video encoding for
+                            best compatibility.
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="requirement">
+
+                        <div class="requirement-icon">
+
+                            <i class="bi bi-check"></i>
+
+                        </div>
+
+                        <div class="requirement-text">
+
+                            AAC audio is recommended.
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="requirement">
+
+                        <div class="requirement-icon">
+
+                            <i class="bi bi-check"></i>
+
+                        </div>
+
+                        <div class="requirement-text">
+
+                            1280×720 or 1920×1080 resolution
+                            is recommended.
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="requirement">
+
+                        <div class="requirement-icon">
+
+                            <i class="bi bi-check"></i>
+
+                        </div>
+
+                        <div class="requirement-text">
+
+                            Keep the original video quality
+                            as high as possible.
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+            <!-- =============================================
+                 STREAMING INFO
+            ============================================== -->
+
+            <div class="info-card">
+
+                <div class="info-card-header">
+
+                    <h3>
+                        Streaming Workflow
+                    </h3>
+
+                </div>
+
+
+                <div class="info-card-body">
+
+
+                    <div class="stream-info">
+
+
+                        <div class="stream-info-row">
+
+                            <span class="stream-info-label">
+                                Step 1
+                            </span>
+
+                            <span class="stream-info-value">
+                                Upload
+                            </span>
+
+                        </div>
+
+
+                        <div class="stream-info-row">
+
+                            <span class="stream-info-label">
+                                Step 2
+                            </span>
+
+                            <span class="stream-info-value">
+                                Process
+                            </span>
+
+                        </div>
+
+
+                        <div class="stream-info-row">
+
+                            <span class="stream-info-label">
+                                Step 3
+                            </span>
+
+                            <span class="stream-info-value">
+                                Add Playlist
+                            </span>
+
+                        </div>
+
+
+                        <div class="stream-info-row">
+
+                            <span class="stream-info-label">
+                                Step 4
+                            </span>
+
+                            <span class="stream-info-value">
+                                Create Stream
+                            </span>
+
+                        </div>
+
+
+                        <div class="stream-info-row">
+
+                            <span class="stream-info-label">
+                                Step 5
+                            </span>
+
+                            <span class="stream-info-value">
+                                YouTube Live
+                            </span>
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script>
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+
+        /* =================================================
+           ELEMENTS
+        ================================================== */
+
+        const form =
+            document.getElementById(
+                "videoUploadForm"
+            );
+
+        const videoFile =
+            document.getElementById(
+                "videoFile"
+            );
+
+        const videoDropzone =
+            document.getElementById(
+                "videoDropzone"
+            );
+
+        const selectedFile =
+            document.getElementById(
+                "selectedFile"
+            );
+
+        const selectedFileName =
+            document.getElementById(
+                "selectedFileName"
+            );
+
+        const selectedFileSize =
+            document.getElementById(
+                "selectedFileSize"
+            );
+
+        const thumbnailFile =
+            document.getElementById(
+                "thumbnailFile"
+            );
+
+        const thumbnailUpload =
+            document.getElementById(
+                "thumbnailUpload"
+            );
+
+        const thumbnailPreview =
+            document.getElementById(
+                "thumbnailPreview"
+            );
+
+        const uploadSubmit =
+            document.getElementById(
+                "uploadSubmit"
+            );
+
+        const uploadError =
+            document.getElementById(
+                "uploadError"
+            );
+
+        const isPublic =
+            document.getElementById(
+                "isPublic"
+            );
+
+        const visibilityIcon =
+            document.getElementById(
+                "visibilityIcon"
+            );
+
+        const visibilityDescription =
+            document.getElementById(
+                "visibilityDescription"
+            );
+
+
+        /* =================================================
+           FORMAT FILE SIZE
+        ================================================== */
+
+        function formatFileSize(bytes) {
+
+            if (bytes === 0) {
+                return "0 Bytes";
+            }
+
+            const units = [
+                "Bytes",
+                "KB",
+                "MB",
+                "GB",
+                "TB"
+            ];
+
+            const index =
+                Math.floor(
+                    Math.log(bytes) /
+                    Math.log(1024)
+                );
+
+            return (
+                parseFloat(
+                    (
+                        bytes /
+                        Math.pow(
+                            1024,
+                            index
+                        )
+                    ).toFixed(2)
+                )
+                +
+                " "
+                +
+                units[index]
+            );
+
+        }
+
+
+        /* =================================================
+           VIDEO FILE
+        ================================================== */
+
+        function handleVideoFile(file) {
+
+            if (!file) {
+                return;
+            }
+
+
+            const allowedTypes = [
+                "video/mp4",
+                "video/webm",
+                "video/quicktime",
+                "video/x-matroska"
+            ];
+
+
+            if (
+                !allowedTypes.includes(
+                    file.type
+                )
+            ) {
+
+                showError(
+                    "Please select a valid video file. MP4 is recommended."
+                );
+
+                videoFile.value = "";
+
+                return;
+
+            }
+
+
+            selectedFileName.textContent =
+                file.name;
+
+
+            selectedFileSize.textContent =
+                formatFileSize(
+                    file.size
+                );
+
+
+            selectedFile.classList.add(
+                "show"
+            );
+
+
+            uploadError.classList.remove(
+                "show"
+            );
+
+        }
+
+
+        if (videoFile) {
+
+            videoFile.addEventListener(
+                "change",
+                function () {
+
+                    if (
+                        this.files &&
+                        this.files.length > 0
+                    ) {
+
+                        handleVideoFile(
+                            this.files[0]
+                        );
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        /* =================================================
+           DRAG & DROP
+        ================================================== */
+
+        if (videoDropzone) {
+
+            videoDropzone.addEventListener(
+                "dragover",
+                function (event) {
+
+                    event.preventDefault();
+
+                    videoDropzone.classList.add(
+                        "dragover"
+                    );
+
+                }
+            );
+
+
+            videoDropzone.addEventListener(
+                "dragleave",
+                function () {
+
+                    videoDropzone.classList.remove(
+                        "dragover"
+                    );
+
+                }
+            );
+
+
+            videoDropzone.addEventListener(
+                "drop",
+                function (event) {
+
+                    event.preventDefault();
+
+                    videoDropzone.classList.remove(
+                        "dragover"
+                    );
+
+
+                    const files =
+                        event.dataTransfer.files;
+
+
+                    if (
+                        files &&
+                        files.length > 0
+                    ) {
+
+                        try {
+
+                            const dataTransfer =
+                                new DataTransfer();
+
+                            dataTransfer.items.add(
+                                files[0]
+                            );
+
+                            videoFile.files =
+                                dataTransfer.files;
+
+                        }
+                        catch (error) {
+
+                            console.warn(
+                                "Could not assign dropped file."
+                            );
+
+                        }
+
+
+                        handleVideoFile(
+                            files[0]
+                        );
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        /* =================================================
+           THUMBNAIL
+        ================================================== */
+
+        if (thumbnailFile) {
+
+            thumbnailFile.addEventListener(
+                "change",
+                function () {
+
+                    const file =
+                        this.files &&
+                        this.files[0];
+
+
+                    if (!file) {
+                        return;
+                    }
+
+
+                    const allowedTypes = [
+                        "image/jpeg",
+                        "image/png",
+                        "image/webp"
+                    ];
+
+
+                    if (
+                        !allowedTypes.includes(
+                            file.type
+                        )
+                    ) {
+
+                        showError(
+                            "Please select a JPG, PNG or WebP thumbnail."
+                        );
+
+                        thumbnailFile.value = "";
+
+                        return;
+
+                    }
+
+
+                    const reader =
+                        new FileReader();
+
+
+                    reader.onload =
+                        function (event) {
+
+                            thumbnailPreview.src =
+                                event.target.result;
+
+                            thumbnailUpload.classList.add(
+                                "has-image"
+                            );
+
+                        };
+
+
+                    reader.readAsDataURL(
+                        file
+                    );
+
+
+                    uploadError.classList.remove(
+                        "show"
+                    );
+
+                }
+            );
+
+        }
+
+
+        /* =================================================
+           VISIBILITY
+        ================================================== */
+
+        if (isPublic) {
+
+            isPublic.addEventListener(
+                "change",
+                function () {
+
+                    if (this.checked) {
+
+                        visibilityIcon.className =
+                            "bi bi-globe2";
+
+                        visibilityDescription.textContent =
+                            "This video can be used publicly in your platform.";
+
+                    }
+                    else {
+
+                        visibilityIcon.className =
+                            "bi bi-lock";
+
+                        visibilityDescription.textContent =
+                            "This video will remain private.";
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        /* =================================================
+           SHOW ERROR
+        ================================================== */
+
+        function showError(message) {
+
+            if (!uploadError) {
+                return;
+            }
+
+            uploadError.textContent =
+                message;
+
+            uploadError.classList.add(
+                "show"
+            );
+
+            uploadError.scrollIntoView({
+                behavior: "smooth",
+                block: "center"
+            });
+
+        }
+
+
+        /* =================================================
+           FORM VALIDATION
+        ================================================== */
+
+        if (form) {
+
+            form.addEventListener(
+                "submit",
+                function (event) {
+
+
+                    if (
+                        !videoFile.files ||
+                        videoFile.files.length === 0
+                    ) {
+
+                        event.preventDefault();
+
+                        showError(
+                            "Please select a video file."
+                        );
+
+                        return;
+
+                    }
+
+
+                    const title =
+                        document
+                            .getElementById(
+                                "videoTitle"
+                            )
+                            .value
+                            .trim();
+
+
+                    if (!title) {
+
+                        event.preventDefault();
+
+                        showError(
+                            "Please enter a video title."
+                        );
+
+                        return;
+
+                    }
+
+
+                    /*
+                     * Disable submit button
+                     * to prevent double upload.
+                     */
+
+                    uploadSubmit.disabled =
+                        true;
+
+
+                    uploadSubmit.innerHTML =
+
+                        '<span class="spinner-border spinner-border-sm"></span>' +
+                        '<span>Uploading...</span>';
+
+
+                    /*
+                     * The normal Django form submission
+                     * will continue from here.
+                     */
+
+                }
+            );
+
+        }
+
+
+    }
+
+);
+
+</script>
+
+{% endblock %}

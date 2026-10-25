@@ -1,0 +1,3508 @@
+{% extends "streaming/base.html" %}
+
+{% block title %}
+
+    {% if session %}
+        Edit Streaming Session | Stream Studio
+    {% else %}
+        Create Streaming Session | Stream Studio
+    {% endif %}
+
+{% endblock %}
+
+
+{% block page_title %}
+
+    {% if session %}
+        Edit Streaming Session
+    {% else %}
+        Create Streaming Session
+    {% endif %}
+
+{% endblock %}
+
+
+{% block page_subtitle %}
+
+    Configure your playlist, RTMP destination and streaming schedule
+
+{% endblock %}
+
+
+{% block extra_css %}
+
+<style>
+
+/* =========================================================
+   PAGE
+========================================================= */
+
+.session-form-page {
+    width: 100%;
+    max-width: 1150px;
+    margin: 0 auto;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.session-form-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 22px;
+}
+
+.session-form-heading h2 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 21px;
+    font-weight: 700;
+}
+
+.session-form-heading p {
+    margin: 5px 0 0;
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    height: 38px;
+    padding: 0 13px;
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+    background: #ffffff;
+    color: #475569;
+    font-size: 11px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.back-btn:hover {
+    background: #f8fafc;
+    color: #111827;
+}
+
+
+/* =========================================================
+   GRID
+========================================================= */
+
+.session-form-grid {
+    display: grid;
+    grid-template-columns:
+        minmax(0, 1fr)
+        340px;
+    gap: 20px;
+    align-items: start;
+}
+
+
+/* =========================================================
+   CARD
+========================================================= */
+
+.form-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 15px;
+    overflow: hidden;
+    margin-bottom: 18px;
+}
+
+.form-card:last-child {
+    margin-bottom: 0;
+}
+
+.form-card-header {
+    padding: 16px 19px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.form-card-header h3 {
+    margin: 0;
+    color: #111827;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.form-card-header p {
+    margin: 4px 0 0;
+    color: #94a3b8;
+    font-size: 10px;
+}
+
+.form-card-body {
+    padding: 19px;
+}
+
+
+/* =========================================================
+   FORM
+========================================================= */
+
+.form-group {
+    margin-bottom: 19px;
+}
+
+.form-group:last-child {
+    margin-bottom: 0;
+}
+
+.form-label {
+    display: block;
+    color: #334155;
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 7px;
+}
+
+.required {
+    color: #ef4444;
+}
+
+.optional {
+    color: #94a3b8;
+    font-weight: 500;
+}
+
+.form-control-custom,
+.form-select-custom {
+    width: 100%;
+    height: 42px;
+    border: 1px solid #dbe2ea;
+    border-radius: 9px;
+    background: #ffffff;
+    color: #334155;
+    font-size: 11px;
+    padding: 0 11px;
+    outline: none;
+    transition:
+        border-color .15s,
+        box-shadow .15s;
+    box-sizing: border-box;
+}
+
+textarea.form-control-custom {
+    height: auto;
+    min-height: 115px;
+    padding: 11px;
+    resize: vertical;
+    line-height: 1.5;
+}
+
+.form-control-custom:focus,
+.form-select-custom:focus {
+    border-color: #94a3b8;
+    box-shadow:
+        0 0 0 3px
+        rgba(148,163,184,.12);
+}
+
+.form-help {
+    color: #94a3b8;
+    font-size: 9px;
+    line-height: 1.5;
+    margin-top: 5px;
+}
+
+.form-help strong {
+    color: #64748b;
+}
+
+
+/* =========================================================
+   TWO COLUMN
+========================================================= */
+
+.form-two-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 13px;
+}
+
+
+/* =========================================================
+   MODE
+========================================================= */
+
+.mode-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.mode-option {
+    position: relative;
+}
+
+.mode-radio {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.mode-label {
+    display: block;
+    padding: 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 11px;
+    cursor: pointer;
+    background: #ffffff;
+    transition: .15s;
+}
+
+.mode-label:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+}
+
+.mode-radio:checked + .mode-label {
+    border-color: #111827;
+    background: #f8fafc;
+    box-shadow:
+        0 0 0 2px
+        rgba(17,24,39,.05);
+}
+
+.mode-icon {
+    width: 35px;
+    height: 35px;
+    border-radius: 9px;
+    background: #f1f5f9;
+    color: #475569;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 9px;
+    font-size: 15px;
+}
+
+.mode-radio:checked
++ .mode-label
+.mode-icon {
+    background: #111827;
+    color: #ffffff;
+}
+
+.mode-title {
+    color: #334155;
+    font-size: 11px;
+    font-weight: 700;
+    margin-bottom: 3px;
+}
+
+.mode-description {
+    color: #94a3b8;
+    font-size: 9px;
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   YOUTUBE
+========================================================= */
+
+.youtube-header {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.youtube-header-icon {
+    width: 33px;
+    height: 33px;
+    border-radius: 8px;
+    background: #fee2e2;
+    color: #dc2626;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+}
+
+.youtube-info-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    margin-bottom: 18px;
+}
+
+.youtube-info-icon {
+    width: 35px;
+    height: 35px;
+    border-radius: 8px;
+    background: #fee2e2;
+    color: #dc2626;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.youtube-info-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.youtube-info-title {
+    color: #334155;
+    font-size: 10px;
+    font-weight: 700;
+    margin-bottom: 3px;
+}
+
+.youtube-info-text {
+    color: #94a3b8;
+    font-size: 9px;
+    line-height: 1.5;
+}
+
+.youtube-link {
+    color: #dc2626;
+    font-size: 10px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.youtube-link:hover {
+    text-decoration: underline;
+}
+
+
+/* =========================================================
+   RTMP
+========================================================= */
+
+.rtmp-section {
+    padding: 14px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 11px;
+    margin-top: 5px;
+}
+
+.rtmp-section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 13px;
+}
+
+.rtmp-section-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: #e2e8f0;
+    color: #475569;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.rtmp-section-title-text {
+    color: #334155;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.rtmp-section-subtitle {
+    color: #94a3b8;
+    font-size: 8px;
+    margin-top: 2px;
+}
+
+.stream-key-wrapper {
+    position: relative;
+}
+
+.stream-key-wrapper .form-control-custom {
+    padding-right: 45px;
+}
+
+.stream-key-toggle {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 30px;
+    height: 30px;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    color: #64748b;
+    cursor: pointer;
+}
+
+.stream-key-toggle:hover {
+    background: #f1f5f9;
+    color: #111827;
+}
+
+.security-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    margin-top: 10px;
+    padding: 9px;
+    border-radius: 8px;
+    background: #ecfdf5;
+    border: 1px solid #d1fae5;
+    color: #047857;
+    font-size: 8px;
+    line-height: 1.5;
+}
+
+.security-note i {
+    margin-top: 1px;
+}
+
+
+/* =========================================================
+   PRIVACY
+========================================================= */
+
+.privacy-grid {
+    display: grid;
+    grid-template-columns:
+        repeat(3, 1fr);
+    gap: 8px;
+}
+
+.privacy-option {
+    position: relative;
+}
+
+.privacy-radio {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.privacy-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 12px 7px;
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+    cursor: pointer;
+    background: #ffffff;
+}
+
+.privacy-radio:checked
++ .privacy-label {
+    border-color: #111827;
+    background: #f8fafc;
+}
+
+.privacy-icon {
+    color: #64748b;
+    font-size: 16px;
+    margin-bottom: 6px;
+}
+
+.privacy-title {
+    color: #475569;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.privacy-description {
+    color: #94a3b8;
+    font-size: 8px;
+    margin-top: 3px;
+}
+
+
+/* =========================================================
+   SCHEDULE
+========================================================= */
+
+.schedule-settings {
+    margin-top: 14px;
+    padding: 14px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+}
+
+.schedule-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px;
+    margin-top: 10px;
+    background: #eff6ff;
+    border: 1px solid #dbeafe;
+    border-radius: 8px;
+    color: #1d4ed8;
+    font-size: 9px;
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   SWITCH
+========================================================= */
+
+.switch-list {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.switch-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 11px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+}
+
+.switch-info {
+    flex: 1;
+}
+
+.switch-title {
+    color: #334155;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.switch-description {
+    color: #94a3b8;
+    font-size: 8px;
+    line-height: 1.4;
+    margin-top: 3px;
+}
+
+.switch {
+    position: relative;
+    width: 40px;
+    height: 22px;
+    flex-shrink: 0;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    inset: 0;
+    background: #cbd5e1;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.slider:before {
+    content: "";
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    left: 3px;
+    top: 3px;
+    background: #ffffff;
+    border-radius: 50%;
+    transition: .2s;
+    box-shadow:
+        0 1px 3px
+        rgba(0,0,0,.15);
+}
+
+.switch input:checked + .slider {
+    background: #111827;
+}
+
+.switch input:checked + .slider:before {
+    transform: translateX(18px);
+}
+
+
+/* =========================================================
+   PLAYLIST PREVIEW
+========================================================= */
+
+.playlist-preview {
+    padding: 13px;
+    border-radius: 11px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    margin-top: 13px;
+}
+
+.playlist-preview-header {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 10px;
+}
+
+.playlist-preview-icon {
+    width: 35px;
+    height: 35px;
+    border-radius: 9px;
+    background: #ffffff;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.playlist-preview-name {
+    color: #334155;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.playlist-preview-count {
+    color: #94a3b8;
+    font-size: 9px;
+    margin-top: 2px;
+}
+
+.playlist-preview-description {
+    color: #94a3b8;
+    font-size: 9px;
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   RTMP STATUS
+========================================================= */
+
+.rtmp-box {
+    padding: 12px;
+    border-radius: 10px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+
+.rtmp-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.rtmp-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #10b981;
+}
+
+.rtmp-status-dot.pending {
+    background: #f59e0b;
+}
+
+.rtmp-status-title {
+    color: #334155;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.rtmp-url {
+    color: #64748b;
+    font-size: 9px;
+    word-break: break-all;
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   INFO LIST
+========================================================= */
+
+.info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+}
+
+.info-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+}
+
+.info-item-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+    background: #f1f5f9;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 11px;
+}
+
+.info-item-text {
+    color: #64748b;
+    font-size: 9px;
+    line-height: 1.5;
+}
+
+.info-item-text strong {
+    color: #334155;
+}
+
+
+/* =========================================================
+   WARNING
+========================================================= */
+
+.warning-box {
+    padding: 12px;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 10px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.warning-box-icon {
+    color: #d97706;
+    font-size: 13px;
+    margin-top: 1px;
+}
+
+.warning-box-text {
+    color: #92400e;
+    font-size: 9px;
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   ERRORS
+========================================================= */
+
+.form-errors {
+    padding: 12px 14px;
+    margin-bottom: 18px;
+    border-radius: 10px;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+    font-size: 10px;
+}
+
+.field-error {
+    color: #dc2626;
+    font-size: 9px;
+    margin-top: 5px;
+}
+
+.has-error {
+    border-color: #fca5a5 !important;
+}
+
+
+/* =========================================================
+   ACTIONS
+========================================================= */
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    padding-top: 18px;
+    margin-top: 18px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.cancel-btn {
+    height: 42px;
+    padding: 0 15px;
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+    background: #ffffff;
+    color: #475569;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.cancel-btn:hover {
+    background: #f8fafc;
+    color: #111827;
+}
+
+.save-btn {
+    height: 42px;
+    padding: 0 17px;
+    border: 0;
+    border-radius: 9px;
+    background: #111827;
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.save-btn:hover {
+    background: #1f2937;
+}
+
+.save-btn:disabled {
+    opacity: .65;
+    cursor: not-allowed;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 950px) {
+
+    .session-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+@media (max-width: 600px) {
+
+    .session-form-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .back-btn {
+        width: 100%;
+    }
+
+    .form-two-columns {
+        grid-template-columns: 1fr;
+    }
+
+    .mode-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .privacy-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+        flex-direction: column-reverse;
+    }
+
+    .cancel-btn,
+    .save-btn {
+        width: 100%;
+    }
+
+}
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="session-form-page">
+
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <div class="session-form-header">
+
+        <div class="session-form-heading">
+
+            <h2>
+
+                {% if session %}
+                    Edit Streaming Session
+                {% else %}
+                    Create Streaming Session
+                {% endif %}
+
+            </h2>
+
+            <p>
+                Configure your playlist, RTMP destination and schedule.
+            </p>
+
+        </div>
+
+
+        <a
+            href="{% url 'streaming:session_list' %}"
+            class="back-btn"
+        >
+
+            <i class="bi bi-arrow-left"></i>
+
+            Back to Sessions
+
+        </a>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         FORM
+    ====================================================== -->
+
+    <form
+        method="post"
+        id="sessionForm"
+        autocomplete="off"
+    >
+
+        {% csrf_token %}
+
+
+        {% if form.non_field_errors %}
+
+            <div class="form-errors">
+
+                {% for error in form.non_field_errors %}
+
+                    <div>
+                        {{ error }}
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% endif %}
+
+
+
+        <div class="session-form-grid">
+
+
+            <!-- =================================================
+                 LEFT COLUMN
+            ================================================== -->
+
+            <div>
+
+
+                <!-- =============================================
+                     SESSION INFORMATION
+                ============================================== -->
+
+                <div class="form-card">
+
+                    <div class="form-card-header">
+
+                        <h3>
+                            Session Information
+                        </h3>
+
+                        <p>
+                            Basic information for this streaming session.
+                        </p>
+
+                    </div>
+
+
+                    <div class="form-card-body">
+
+
+                        <!-- SESSION TITLE -->
+
+                        <div class="form-group">
+
+                            <label
+                                for="sessionTitle"
+                                class="form-label"
+                            >
+
+                                Session Title
+
+                                <span class="required">*</span>
+
+                            </label>
+
+
+                            <input
+                                type="text"
+                                name="title"
+                                id="sessionTitle"
+                                class="form-control-custom"
+                                maxlength="255"
+                                placeholder="Example: Morning Live Stream"
+                                value="{% if session %}{{ session.title }}{% endif %}"
+                                required
+                            >
+
+
+                            {% if form.title.errors %}
+
+                                {% for error in form.title.errors %}
+
+                                    <div class="field-error">
+                                        {{ error }}
+                                    </div>
+
+                                {% endfor %}
+
+                            {% endif %}
+
+
+                            <div class="form-help">
+
+                                Give this session an internal name so
+                                you can easily identify it.
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- DESCRIPTION -->
+
+                        <div class="form-group">
+
+                            <label
+                                for="sessionDescription"
+                                class="form-label"
+                            >
+
+                                Description
+
+                                <span class="optional">
+                                    (Optional)
+                                </span>
+
+                            </label>
+
+
+                            <textarea
+                                name="description"
+                                id="sessionDescription"
+                                class="form-control-custom"
+                                placeholder="Describe this streaming session..."
+                            >{% if session %}{{ session.description }}{% endif %}</textarea>
+
+                        </div>
+
+
+
+                        <!-- PLAYLIST -->
+
+                        <div class="form-group">
+
+                            <label
+                                for="playlistSelect"
+                                class="form-label"
+                            >
+
+                                Playlist
+
+                                <span class="required">*</span>
+
+                            </label>
+
+
+                            <select
+                                name="playlist"
+                                id="playlistSelect"
+                                class="form-select-custom"
+                                required
+                            >
+
+                                <option value="">
+                                    Select a playlist
+                                </option>
+
+
+                                {% for playlist in playlists %}
+
+                                    <option
+                                        value="{{ playlist.pk }}"
+                                        data-count="{{ playlist.items.count }}"
+                                        data-description="{{ playlist.description|default:''|escape }}"
+                                        {% if session and session.playlist_id == playlist.pk %}
+                                            selected
+                                        {% endif %}
+                                    >
+
+                                        {{ playlist.name }}
+
+                                    </option>
+
+                                {% endfor %}
+
+                            </select>
+
+
+                            <div class="form-help">
+
+                                Select the playlist containing the videos
+                                that should be streamed.
+
+                            </div>
+
+
+
+                            <!-- PLAYLIST PREVIEW -->
+
+                            <div
+                                class="playlist-preview"
+                                id="playlistPreview"
+                                style="display:none;"
+                            >
+
+                                <div class="playlist-preview-header">
+
+                                    <div class="playlist-preview-icon">
+
+                                        <i class="bi bi-collection-play"></i>
+
+                                    </div>
+
+
+                                    <div>
+
+                                        <div
+                                            class="playlist-preview-name"
+                                            id="playlistPreviewName"
+                                        ></div>
+
+
+                                        <div
+                                            class="playlist-preview-count"
+                                            id="playlistPreviewCount"
+                                        ></div>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div
+                                    class="playlist-preview-description"
+                                    id="playlistPreviewDescription"
+                                ></div>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- STREAM MODE -->
+
+                        <div class="form-group">
+
+                            <label class="form-label">
+
+                                Streaming Mode
+
+                                <span class="required">*</span>
+
+                            </label>
+
+
+                            <div class="mode-grid">
+
+
+                                <!-- ONE BY ONE -->
+
+                                <div class="mode-option">
+
+                                    <input
+                                        type="radio"
+                                        name="mode"
+                                        id="modeOneByOne"
+                                        value="one_by_one"
+                                        class="mode-radio"
+
+                                        {% if not session or session.mode == "one_by_one" %}
+                                            checked
+                                        {% endif %}
+                                    >
+
+
+                                    <label
+                                        for="modeOneByOne"
+                                        class="mode-label"
+                                    >
+
+                                        <div class="mode-icon">
+
+                                            <i class="bi bi-list-ol"></i>
+
+                                        </div>
+
+
+                                        <div class="mode-title">
+                                            One by One
+                                        </div>
+
+
+                                        <div class="mode-description">
+                                            Play each video once in
+                                            playlist order.
+                                        </div>
+
+                                    </label>
+
+                                </div>
+
+
+
+                                <!-- REPEAT -->
+
+                                <div class="mode-option">
+
+                                    <input
+                                        type="radio"
+                                        name="mode"
+                                        id="modeRepeat"
+                                        value="repeat"
+                                        class="mode-radio"
+
+                                        {% if session and session.mode == "repeat" %}
+                                            checked
+                                        {% endif %}
+                                    >
+
+
+                                    <label
+                                        for="modeRepeat"
+                                        class="mode-label"
+                                    >
+
+                                        <div class="mode-icon">
+
+                                            <i class="bi bi-arrow-repeat"></i>
+
+                                        </div>
+
+
+                                        <div class="mode-title">
+                                            Repeat
+                                        </div>
+
+
+                                        <div class="mode-description">
+                                            Continue from the beginning
+                                            after the playlist ends.
+                                        </div>
+
+                                    </label>
+
+                                </div>
+
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =============================================
+                     YOUTUBE / RTMP
+                ============================================== -->
+
+                <div class="form-card">
+
+
+                    <div class="form-card-header">
+
+                        <div class="youtube-header">
+
+                            <div class="youtube-header-icon">
+
+                                <i class="bi bi-youtube"></i>
+
+                            </div>
+
+
+                            <div>
+
+                                <h3>
+                                    YouTube Live / RTMP
+                                </h3>
+
+                                <p>
+                                    Configure the destination used by FFmpeg.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="form-card-body">
+
+
+                        <!-- INFORMATION -->
+
+                        <div class="youtube-info-box">
+
+                            <div class="youtube-info-icon">
+
+                                <i class="bi bi-shield-check"></i>
+
+                            </div>
+
+
+                            <div class="youtube-info-content">
+
+                                <div class="youtube-info-title">
+                                    Secure RTMP Streaming
+                                </div>
+
+
+                                <div class="youtube-info-text">
+
+                                    Your VPS/FFmpeg process will send the
+                                    selected playlist to the RTMP destination.
+
+                                    The stream key is entered as a password
+                                    and is not displayed elsewhere on this page.
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- SAVED CHANNEL -->
+
+                        <div class="form-group">
+
+                            <label
+                                for="youtubeChannel"
+                                class="form-label"
+                            >
+
+                                YouTube Channel
+
+                                <span class="optional">
+                                    (Optional)
+                                </span>
+
+                            </label>
+
+
+                            <select
+                                name="youtube_channel"
+                                id="youtubeChannel"
+                                class="form-select-custom"
+                            >
+
+                                <option value="">
+                                    Manual RTMP Configuration
+                                </option>
+
+
+                                {% for channel in youtube_channels %}
+
+                                    <option
+                                        value="{{ channel.pk }}"
+                                    >
+
+                                        {{ channel.channel_title|default:channel.channel_id }}
+
+                                    </option>
+
+                                {% endfor %}
+
+                            </select>
+
+
+                            <div class="form-help">
+
+                                Select a saved channel or use manual
+                                RTMP configuration below.
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- SAVED STREAM -->
+
+                        <div class="form-group">
+
+                            <label
+                                for="youtubeStream"
+                                class="form-label"
+                            >
+
+                                Saved YouTube Stream
+
+                                <span class="optional">
+                                    (Optional)
+                                </span>
+
+                            </label>
+
+
+                            <select
+                                name="youtube_stream"
+                                id="youtubeStream"
+                                class="form-select-custom"
+                            >
+
+                                <option value="">
+                                    Manual RTMP Configuration
+                                </option>
+
+
+                                {% for stream in youtube_streams %}
+
+                                    <option
+                                        value="{{ stream.pk }}"
+                                        data-channel="{{ stream.channel_id }}"
+                                        data-ingestion="{{ stream.ingestion_address|default:''|escape }}"
+                                    >
+
+                                        {{ stream.stream_name|default:stream.youtube_stream_id }}
+
+                                    </option>
+
+                                {% endfor %}
+
+                            </select>
+
+
+                            <div class="form-help">
+
+                                Selecting a saved stream can automatically
+                                fill its RTMP URL. The saved stream key is
+                                never exposed to the browser.
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- RTMP CONFIGURATION -->
+
+                        <div class="rtmp-section">
+
+
+                            <div class="rtmp-section-title">
+
+                                <div class="rtmp-section-icon">
+
+                                    <i class="bi bi-broadcast"></i>
+
+                                </div>
+
+
+                                <div>
+
+                                    <div class="rtmp-section-title-text">
+                                        RTMP Configuration
+                                    </div>
+
+                                    <div class="rtmp-section-subtitle">
+                                        Required for FFmpeg streaming
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+
+                            <!-- RTMP URL -->
+
+                            <div class="form-group">
+
+                                <label
+                                    for="youtubeRtmpUrl"
+                                    class="form-label"
+                                >
+
+                                    RTMP / RTMPS URL
+
+                                    <span class="required">*</span>
+
+                                </label>
+
+
+                                <input
+                                    type="text"
+                                    name="youtube_rtmp_url"
+                                    id="youtubeRtmpUrl"
+                                    class="form-control-custom"
+                                    maxlength="500"
+                                    placeholder="rtmp://a.rtmp.youtube.com/live2"
+                                    value="{% if session %}{{ session.youtube_rtmp_url|default:'' }}{% endif %}"
+                                    autocomplete="off"
+                                    required
+                                >
+
+
+                                <div class="form-help">
+
+                                    Example:
+
+                                    <strong>
+                                        rtmp://a.rtmp.youtube.com/live2
+                                    </strong>
+
+                                </div>
+
+                            </div>
+
+
+
+                            <!-- STREAM KEY -->
+
+                            <div class="form-group">
+
+                                <label
+                                    for="youtubeStreamKey"
+                                    class="form-label"
+                                >
+
+                                    Stream Key
+
+                                    <span class="required">*</span>
+
+                                </label>
+
+
+                                <div class="stream-key-wrapper">
+
+                                    <input
+                                        type="password"
+                                        name="youtube_stream_key"
+                                        id="youtubeStreamKey"
+                                        class="form-control-custom"
+                                        maxlength="255"
+                                        placeholder="{% if session %}Enter new stream key{% else %}Enter YouTube stream key{% endif %}"
+                                        autocomplete="new-password"
+                                        required
+                                    >
+
+
+                                    <button
+                                        type="button"
+                                        class="stream-key-toggle"
+                                        id="toggleStreamKey"
+                                        title="Show/Hide Stream Key"
+                                        aria-label="Show or hide stream key"
+                                    >
+
+                                        <i
+                                            class="bi bi-eye"
+                                            id="streamKeyIcon"
+                                        ></i>
+
+                                    </button>
+
+                                </div>
+
+
+                                <div class="form-help">
+
+                                    Enter the stream key from YouTube Studio.
+
+                                    For security, an existing saved stream key
+                                    is never displayed in this form.
+
+                                </div>
+
+
+                                <div class="security-note">
+
+                                    <i class="bi bi-shield-lock"></i>
+
+                                    <span>
+                                        Your stream key is treated as a secret.
+                                        Never share it publicly or put it in
+                                        JavaScript, HTML data attributes, or logs.
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+                        </div>
+
+
+
+                        <!-- YOUTUBE LIVE URL -->
+
+                        <div
+                            class="form-group"
+                            style="margin-top:18px;"
+                        >
+
+                            <label
+                                for="youtubeUrl"
+                                class="form-label"
+                            >
+
+                                YouTube Live URL
+
+                                <span class="optional">
+                                    (Optional)
+                                </span>
+
+                            </label>
+
+
+                            <input
+                                type="url"
+                                name="youtube_url"
+                                id="youtubeUrl"
+                                class="form-control-custom"
+                                maxlength="500"
+                                placeholder="https://www.youtube.com/watch?v=..."
+                                value="{% if session %}{{ session.youtube_url|default:'' }}{% endif %}"
+                                autocomplete="off"
+                            >
+
+
+                            <div class="form-help">
+
+                                Optional viewing URL for your YouTube live
+                                broadcast. This is different from the RTMP URL.
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- PRIVACY -->
+
+                        <div class="form-group">
+
+                            <label class="form-label">
+
+                                YouTube Privacy
+
+                            </label>
+
+
+                            <div class="privacy-grid">
+
+
+                                <!-- PUBLIC -->
+
+                                <div class="privacy-option">
+
+                                    <input
+                                        type="radio"
+                                        name="youtube_privacy"
+                                        id="privacyPublic"
+                                        value="public"
+                                        class="privacy-radio"
+
+                                        {% if not session or session.youtube_privacy == "public" %}
+                                            checked
+                                        {% endif %}
+                                    >
+
+
+                                    <label
+                                        for="privacyPublic"
+                                        class="privacy-label"
+                                    >
+
+                                        <div class="privacy-icon">
+
+                                            <i class="bi bi-globe2"></i>
+
+                                        </div>
+
+
+                                        <div class="privacy-title">
+                                            Public
+                                        </div>
+
+
+                                        <div class="privacy-description">
+                                            Everyone
+                                        </div>
+
+                                    </label>
+
+                                </div>
+
+
+
+                                <!-- UNLISTED -->
+
+                                <div class="privacy-option">
+
+                                    <input
+                                        type="radio"
+                                        name="youtube_privacy"
+                                        id="privacyUnlisted"
+                                        value="unlisted"
+                                        class="privacy-radio"
+
+                                        {% if not session or session.youtube_privacy == "unlisted" %}
+                                            checked
+                                        {% endif %}
+                                    >
+
+
+                                    <label
+                                        for="privacyUnlisted"
+                                        class="privacy-label"
+                                    >
+
+                                        <div class="privacy-icon">
+
+                                            <i class="bi bi-link-45deg"></i>
+
+                                        </div>
+
+
+                                        <div class="privacy-title">
+                                            Unlisted
+                                        </div>
+
+
+                                        <div class="privacy-description">
+                                            Link only
+                                        </div>
+
+                                    </label>
+
+                                </div>
+
+
+
+                                <!-- PRIVATE -->
+
+                                <div class="privacy-option">
+
+                                    <input
+                                        type="radio"
+                                        name="youtube_privacy"
+                                        id="privacyPrivate"
+                                        value="private"
+                                        class="privacy-radio"
+
+                                        {% if session and session.youtube_privacy == "private" %}
+                                            checked
+                                        {% endif %}
+                                    >
+
+
+                                    <label
+                                        for="privacyPrivate"
+                                        class="privacy-label"
+                                    >
+
+                                        <div class="privacy-icon">
+
+                                            <i class="bi bi-lock"></i>
+
+                                        </div>
+
+
+                                        <div class="privacy-title">
+                                            Private
+                                        </div>
+
+
+                                        <div class="privacy-description">
+                                            Only you
+                                        </div>
+
+                                    </label>
+
+                                </div>
+
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- EXISTING RTMP STATUS -->
+
+                        {% if session %}
+
+                            <div class="form-group">
+
+                                <label class="form-label">
+                                    Current RTMP Configuration
+                                </label>
+
+
+                                <div class="rtmp-box">
+
+                                    <div class="rtmp-status">
+
+                                        {% if session.youtube_rtmp_url %}
+
+                                            <span class="rtmp-status-dot"></span>
+
+                                            <span class="rtmp-status-title">
+                                                RTMP URL Configured
+                                            </span>
+
+                                        {% else %}
+
+                                            <span class="rtmp-status-dot pending"></span>
+
+                                            <span class="rtmp-status-title">
+                                                RTMP URL Not Configured
+                                            </span>
+
+                                        {% endif %}
+
+                                    </div>
+
+
+                                    {% if session.youtube_rtmp_url %}
+
+                                        <div class="rtmp-url">
+
+                                            {{ session.youtube_rtmp_url }}
+
+                                        </div>
+
+                                    {% endif %}
+
+
+                                    <div
+                                        class="rtmp-url"
+                                        style="margin-top:7px;"
+                                    >
+
+                                        <i class="bi bi-key"></i>
+
+                                        Stream key:
+                                        <strong>
+                                            Hidden for security
+                                        </strong>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        {% endif %}
+
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =============================================
+                     STREAM SCHEDULE
+                ============================================== -->
+
+                <div class="form-card">
+
+                    <div class="form-card-header">
+
+                        <h3>
+                            Stream Schedule
+                        </h3>
+
+                        <p>
+                            Choose when this streaming session should begin.
+                        </p>
+
+                    </div>
+
+
+                    <div class="form-card-body">
+
+
+                        <!-- START TYPE -->
+
+                        <div class="mode-grid">
+
+
+                            <!-- START NOW -->
+
+                            <div class="mode-option">
+
+                                <input
+                                    type="radio"
+                                    name="start_type"
+                                    id="startNow"
+                                    value="now"
+                                    class="mode-radio"
+
+                                    {% if not session or not session.scheduled_start %}
+                                        checked
+                                    {% endif %}
+                                >
+
+
+                                <label
+                                    for="startNow"
+                                    class="mode-label"
+                                >
+
+                                    <div class="mode-icon">
+
+                                        <i class="bi bi-play-circle"></i>
+
+                                    </div>
+
+
+                                    <div class="mode-title">
+                                        Start Manually
+                                    </div>
+
+
+                                    <div class="mode-description">
+                                        Create the session now and start
+                                        it manually when ready.
+                                    </div>
+
+                                </label>
+
+                            </div>
+
+
+
+                            <!-- SCHEDULE -->
+
+                            <div class="mode-option">
+
+                                <input
+                                    type="radio"
+                                    name="start_type"
+                                    id="startScheduled"
+                                    value="scheduled"
+                                    class="mode-radio"
+
+                                    {% if session and session.scheduled_start %}
+                                        checked
+                                    {% endif %}
+                                >
+
+
+                                <label
+                                    for="startScheduled"
+                                    class="mode-label"
+                                >
+
+                                    <div class="mode-icon">
+
+                                        <i class="bi bi-calendar-event"></i>
+
+                                    </div>
+
+
+                                    <div class="mode-title">
+                                        Schedule
+                                    </div>
+
+
+                                    <div class="mode-description">
+                                        Automatically queue the session
+                                        for a future time.
+                                    </div>
+
+                                </label>
+
+                            </div>
+
+
+                        </div>
+
+
+
+                        <!-- SCHEDULE SETTINGS -->
+
+                        <div
+                            class="schedule-settings"
+                            id="scheduleSettings"
+                            style="display:none;"
+                        >
+
+                            <label
+                                for="scheduledStart"
+                                class="form-label"
+                            >
+
+                                Scheduled Start Time
+
+                                <span class="required">*</span>
+
+                            </label>
+
+
+                            <input
+                                type="datetime-local"
+                                name="scheduled_at"
+                                id="scheduledStart"
+                                class="form-control-custom"
+                                value="{% if session and session.scheduled_start %}{{ session.scheduled_start|date:'Y-m-d\TH:i' }}{% endif %}"
+                            >
+
+
+                            <div class="form-help">
+
+                                Use your Django server timezone
+                                (Asia/Kolkata if configured).
+
+                            </div>
+
+
+                            <div class="schedule-note">
+
+                                <i class="bi bi-info-circle"></i>
+
+                                <span>
+
+                                    Scheduled sessions can be picked up
+                                    by Celery or your background worker
+                                    when their scheduled time arrives.
+
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =============================================
+                     ACTIONS
+                ============================================== -->
+
+                <div class="form-actions">
+
+
+                    <a
+                        href="{% url 'streaming:session_list' %}"
+                        class="cancel-btn"
+                    >
+
+                        Cancel
+
+                    </a>
+
+
+                    <button
+                        type="submit"
+                        class="save-btn"
+                        id="saveSessionBtn"
+                    >
+
+                        {% if session %}
+
+                            <i class="bi bi-check-lg"></i>
+
+                            Update Session
+
+                        {% else %}
+
+                            <i class="bi bi-broadcast-pin"></i>
+
+                            Create Session
+
+                        {% endif %}
+
+                    </button>
+
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- =================================================
+                 RIGHT COLUMN
+            ================================================== -->
+
+            <div>
+
+
+                <!-- =============================================
+                     AUTOMATION
+                ============================================== -->
+
+                <div class="form-card">
+
+                    <div class="form-card-header">
+
+                        <h3>
+                            Automation
+                        </h3>
+
+                        <p>
+                            Configure automatic session startup.
+                        </p>
+
+                    </div>
+
+
+                    <div class="form-card-body">
+
+                        <div class="switch-list">
+
+
+                            <!-- AUTO START -->
+
+                            <div class="switch-row">
+
+                                <div class="switch-info">
+
+                                    <div class="switch-title">
+                                        Auto Start
+                                    </div>
+
+                                    <div class="switch-description">
+
+                                        Automatically start this session
+                                        when the scheduled time is reached.
+
+                                    </div>
+
+                                    <div
+                                        id="autoStartHelp"
+                                        class="form-help"
+                                        style="margin-top:6px;"
+                                    >
+                                        {% if not session or session.auto_start %}
+                                            Auto Start is enabled.
+                                        {% else %}
+                                            Auto Start is disabled.
+                                        {% endif %}
+                                    </div>
+
+                                </div>
+
+
+                                <label class="switch">
+
+                                    <input
+                                        type="checkbox"
+                                        name="auto_start"
+                                        id="autoStart"
+
+                                        {% if not session or session.auto_start %}
+                                            checked
+                                        {% endif %}
+                                    >
+
+                                    <span class="slider"></span>
+
+                                </label>
+
+                            </div>
+
+
+                            <!-- AUTO CONTINUE -->
+
+                            <div class="switch-row">
+
+                                <div class="switch-info">
+
+                                    <div class="switch-title">
+                                        Auto Continue
+                                    </div>
+
+                                    <div class="switch-description">
+
+                                        Continue processing the playlist
+                                        automatically.
+
+                                    </div>
+
+                                </div>
+
+
+                                <label class="switch">
+
+                                    <input
+                                        type="checkbox"
+                                        name="auto_continue"
+                                        id="autoContinue"
+
+                                        {% if not session or session.auto_continue %}
+                                            checked
+                                        {% endif %}
+                                    >
+
+                                    <span class="slider"></span>
+
+                                </label>
+
+                            </div>
+
+
+                            <!-- AUTO STOP -->
+
+                            <div class="switch-row">
+
+                                <div class="switch-info">
+
+                                    <div class="switch-title">
+                                        Auto Stop
+                                    </div>
+
+                                    <div class="switch-description">
+
+                                        Stop the session automatically
+                                        when processing is complete.
+
+                                    </div>
+
+                                </div>
+
+
+                                <label class="switch">
+
+                                    <input
+                                        type="checkbox"
+                                        name="auto_stop"
+                                        id="autoStop"
+
+                                        {% if not session or session.auto_stop %}
+                                            checked
+                                        {% endif %}
+                                    >
+
+                                    <span class="slider"></span>
+
+                                </label>
+
+                            </div>
+
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =============================================
+                     CURRENT SESSION STATUS
+                ============================================== -->
+
+                {% if session %}
+
+                    <div class="form-card">
+
+                        <div class="form-card-header">
+
+                            <h3>
+                                Session Status
+                            </h3>
+
+                            <p>
+                                Current streaming session state.
+                            </p>
+
+                        </div>
+
+
+                        <div class="form-card-body">
+
+                            <div class="rtmp-box">
+
+
+                                <div class="rtmp-status">
+
+                                    {% if session.status == "live" %}
+
+                                        <span class="rtmp-status-dot"></span>
+
+                                    {% elif session.status == "failed" %}
+
+                                        <span
+                                            class="rtmp-status-dot pending"
+                                            style="background:#ef4444;"
+                                        ></span>
+
+                                    {% else %}
+
+                                        <span
+                                            class="rtmp-status-dot pending"
+                                        ></span>
+
+                                    {% endif %}
+
+
+                                    <span class="rtmp-status-title">
+
+                                        {{ session.get_status_display }}
+
+                                    </span>
+
+                                </div>
+
+
+                                {% if session.last_error %}
+
+                                    <div
+                                        class="rtmp-url"
+                                        style="
+                                            color:#b91c1c;
+                                            margin-top:7px;
+                                        "
+                                    >
+
+                                        {{ session.last_error|truncatechars:250 }}
+
+                                    </div>
+
+                                {% endif %}
+
+
+                                {% if session.started_at %}
+
+                                    <div
+                                        class="rtmp-url"
+                                        style="margin-top:7px;"
+                                    >
+
+                                        Started:
+
+                                        {{ session.started_at|date:"d M Y, h:i A" }}
+
+                                    </div>
+
+                                {% endif %}
+
+
+                                {% if session.ended_at %}
+
+                                    <div
+                                        class="rtmp-url"
+                                        style="margin-top:4px;"
+                                    >
+
+                                        Ended:
+
+                                        {{ session.ended_at|date:"d M Y, h:i A" }}
+
+                                    </div>
+
+                                {% endif %}
+
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                {% endif %}
+
+
+
+                <!-- =============================================
+                     VPS INFORMATION
+                ============================================== -->
+
+                <div class="form-card">
+
+                    <div class="form-card-header">
+
+                        <h3>
+                            VPS Streaming
+                        </h3>
+
+                        <p>
+                            How the streaming pipeline works.
+                        </p>
+
+                    </div>
+
+
+                    <div class="form-card-body">
+
+                        <div class="info-list">
+
+
+                            <div class="info-item">
+
+                                <div class="info-item-icon">
+
+                                    <i class="bi bi-cloud"></i>
+
+                                </div>
+
+
+                                <div class="info-item-text">
+
+                                    Your <strong>VPS</strong> runs the
+                                    streaming process.
+
+                                </div>
+
+                            </div>
+
+
+
+                            <div class="info-item">
+
+                                <div class="info-item-icon">
+
+                                    <i class="bi bi-collection-play"></i>
+
+                                </div>
+
+
+                                <div class="info-item-text">
+
+                                    Videos are loaded from the selected
+                                    <strong>playlist</strong>.
+
+                                </div>
+
+                            </div>
+
+
+
+                            <div class="info-item">
+
+                                <div class="info-item-icon">
+
+                                    <i class="bi bi-film"></i>
+
+                                </div>
+
+
+                                <div class="info-item-text">
+
+                                    FFmpeg processes the selected video
+                                    and sends the stream to the configured
+                                    <strong>RTMP destination</strong>.
+
+                                </div>
+
+                            </div>
+
+
+
+                            <div class="info-item">
+
+                                <div class="info-item-icon">
+
+                                    <i class="bi bi-arrow-repeat"></i>
+
+                                </div>
+
+
+                                <div class="info-item-text">
+
+                                    The session mode determines whether
+                                    the playlist runs once or repeats.
+
+                                </div>
+
+                            </div>
+
+
+
+                            <div class="info-item">
+
+                                <div class="info-item-icon">
+
+                                    <i class="bi bi-clock"></i>
+
+                                </div>
+
+
+                                <div class="info-item-text">
+
+                                    Scheduled sessions can be managed
+                                    through <strong>Celery</strong>.
+
+                                </div>
+
+                            </div>
+
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =============================================
+                     IMPORTANT
+                ============================================== -->
+
+                <div class="warning-box">
+
+                    <div class="warning-box-icon">
+
+                        <i class="bi bi-exclamation-triangle"></i>
+
+                    </div>
+
+
+                    <div class="warning-box-text">
+
+                        Make sure the RTMP destination and stream key
+                        are correct and your VPS has
+                        <strong>FFmpeg</strong> installed before
+                        starting the session.
+
+                        <br><br>
+
+                        Never expose your YouTube stream key in
+                        HTML, JavaScript, logs, API responses, or
+                        browser data attributes.
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+    </form>
+
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script>
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+
+        /* =================================================
+           ELEMENTS
+        ================================================= */
+
+        const playlistSelect =
+            document.getElementById(
+                "playlistSelect"
+            );
+
+
+        const playlistPreview =
+            document.getElementById(
+                "playlistPreview"
+            );
+
+
+        const playlistPreviewName =
+            document.getElementById(
+                "playlistPreviewName"
+            );
+
+
+        const playlistPreviewCount =
+            document.getElementById(
+                "playlistPreviewCount"
+            );
+
+
+        const playlistPreviewDescription =
+            document.getElementById(
+                "playlistPreviewDescription"
+            );
+
+
+        const startNow =
+            document.getElementById(
+                "startNow"
+            );
+
+
+        const startScheduled =
+            document.getElementById(
+                "startScheduled"
+            );
+
+
+        const scheduleSettings =
+            document.getElementById(
+                "scheduleSettings"
+            );
+
+
+        const scheduledStart =
+            document.getElementById(
+                "scheduledStart"
+            );
+
+
+        const sessionForm =
+            document.getElementById(
+                "sessionForm"
+            );
+
+
+        const saveButton =
+            document.getElementById(
+                "saveSessionBtn"
+            );
+
+
+        const youtubeStream =
+            document.getElementById(
+                "youtubeStream"
+            );
+
+
+        const youtubeChannel =
+            document.getElementById(
+                "youtubeChannel"
+            );
+
+
+        const youtubeRtmpUrl =
+            document.getElementById(
+                "youtubeRtmpUrl"
+            );
+
+
+        const youtubeStreamKey =
+            document.getElementById(
+                "youtubeStreamKey"
+            );
+
+
+        const toggleStreamKey =
+            document.getElementById(
+                "toggleStreamKey"
+            );
+
+        const autoStart =
+            document.getElementById(
+                "autoStart"
+            );
+
+        const autoStartHelp =
+            document.getElementById(
+                "autoStartHelp"
+            );
+
+
+        const streamKeyIcon =
+            document.getElementById(
+                "streamKeyIcon"
+            );
+
+
+        /* =================================================
+           PLAYLIST PREVIEW
+        ================================================= */
+
+        function updatePlaylistPreview() {
+
+            if (!playlistSelect) {
+                return;
+            }
+
+
+            const selectedOption =
+                playlistSelect.options[
+                    playlistSelect.selectedIndex
+                ];
+
+
+            if (
+                !selectedOption ||
+                !selectedOption.value
+            ) {
+
+                playlistPreview.style.display =
+                    "none";
+
+                return;
+
+            }
+
+
+            const name =
+                selectedOption.textContent
+                    .trim();
+
+
+            const count =
+                selectedOption.dataset.count ||
+                "0";
+
+
+            const description =
+                selectedOption.dataset.description ||
+                "No description available.";
+
+
+            playlistPreviewName.textContent =
+                name;
+
+
+            playlistPreviewCount.textContent =
+                count +
+                (
+                    count === "1"
+                        ? " video"
+                        : " videos"
+                );
+
+
+            playlistPreviewDescription.textContent =
+                description;
+
+
+            playlistPreview.style.display =
+                "block";
+
+        }
+
+
+        if (playlistSelect) {
+
+            playlistSelect.addEventListener(
+                "change",
+                updatePlaylistPreview
+            );
+
+            updatePlaylistPreview();
+
+        }
+
+
+
+        /* =================================================
+           AUTO START
+        ================================================= */
+
+        function updateAutoStartHelp() {
+
+            if (!autoStart || !autoStartHelp) {
+                return;
+            }
+
+            autoStartHelp.textContent =
+                autoStart.checked
+                    ? "Auto Start is enabled."
+                    : "Auto Start is disabled.";
+        }
+
+
+        if (autoStart) {
+
+            autoStart.addEventListener(
+                "change",
+                updateAutoStartHelp
+            );
+
+            updateAutoStartHelp();
+        }
+
+
+        /* =================================================
+           STREAM KEY SHOW / HIDE
+        ================================================= */
+
+        if (
+            toggleStreamKey &&
+            youtubeStreamKey &&
+            streamKeyIcon
+        ) {
+
+            toggleStreamKey.addEventListener(
+                "click",
+                function () {
+
+                    if (
+                        youtubeStreamKey.type ===
+                        "password"
+                    ) {
+
+                        youtubeStreamKey.type =
+                            "text";
+
+                        streamKeyIcon.className =
+                            "bi bi-eye-slash";
+
+                    } else {
+
+                        youtubeStreamKey.type =
+                            "password";
+
+                        streamKeyIcon.className =
+                            "bi bi-eye";
+
+                    }
+
+                }
+            );
+
+        }
+
+
+
+        /* =================================================
+           SAVED STREAM
+        ================================================= */
+
+        if (youtubeStream) {
+
+            youtubeStream.addEventListener(
+                "change",
+                function () {
+
+                    const selected =
+                        youtubeStream.options[
+                            youtubeStream.selectedIndex
+                        ];
+
+
+                    if (
+                        !selected ||
+                        !selected.value
+                    ) {
+                        return;
+                    }
+
+
+                    const channelId =
+                        selected.dataset.channel ||
+                        "";
+
+
+                    const ingestion =
+                        selected.dataset.ingestion ||
+                        "";
+
+
+                    /*
+                     * Populate channel.
+                     */
+
+                    if (
+                        youtubeChannel &&
+                        channelId
+                    ) {
+
+                        youtubeChannel.value =
+                            channelId;
+
+                    }
+
+
+                    /*
+                     * Populate RTMP URL.
+                     *
+                     * IMPORTANT:
+                     * Stream key is intentionally
+                     * NOT exposed here.
+                     */
+
+                    if (
+                        youtubeRtmpUrl &&
+                        ingestion
+                    ) {
+
+                        youtubeRtmpUrl.value =
+                            ingestion;
+
+                    }
+
+                }
+            );
+
+        }
+
+
+
+        /* =================================================
+           CHANNEL -> STREAM FILTER
+        ================================================= */
+
+        if (
+            youtubeChannel &&
+            youtubeStream
+        ) {
+
+            youtubeChannel.addEventListener(
+                "change",
+                function () {
+
+                    const channelId =
+                        youtubeChannel.value;
+
+
+                    const options =
+                        youtubeStream.querySelectorAll(
+                            "option[data-channel]"
+                        );
+
+
+                    options.forEach(
+                        function (option) {
+
+                            if (
+                                !channelId ||
+                                option.dataset.channel ===
+                                    channelId
+                            ) {
+
+                                option.hidden =
+                                    false;
+
+                            } else {
+
+                                option.hidden =
+                                    true;
+
+                            }
+
+                        }
+                    );
+
+
+                    /*
+                     * Reset selected stream when
+                     * channel changes.
+                     */
+
+                    youtubeStream.value = "";
+
+                }
+            );
+
+        }
+
+
+
+        /* =================================================
+           SCHEDULE
+        ================================================= */
+
+        function updateScheduleSettings() {
+
+            if (
+                startScheduled &&
+                startScheduled.checked
+            ) {
+
+                scheduleSettings.style.display =
+                    "block";
+
+
+                if (scheduledStart) {
+
+                    scheduledStart.required =
+                        true;
+
+                }
+
+            } else {
+
+                scheduleSettings.style.display =
+                    "none";
+
+
+                if (scheduledStart) {
+
+                    scheduledStart.required =
+                        false;
+
+                }
+
+            }
+
+        }
+
+
+        if (startNow) {
+
+            startNow.addEventListener(
+                "change",
+                updateScheduleSettings
+            );
+
+        }
+
+
+        if (startScheduled) {
+
+            startScheduled.addEventListener(
+                "change",
+                updateScheduleSettings
+            );
+
+        }
+
+
+        updateScheduleSettings();
+
+
+
+        /* =================================================
+           SCHEDULE MINIMUM DATE
+        ================================================= */
+
+        function setMinimumScheduleDate() {
+
+            if (!scheduledStart) {
+                return;
+            }
+
+
+            /*
+             * Don't overwrite an existing value
+             * while editing a session.
+             */
+
+            if (scheduledStart.value) {
+                return;
+            }
+
+
+            const now =
+                new Date();
+
+
+            const year =
+                now.getFullYear();
+
+
+            const month =
+                String(
+                    now.getMonth() + 1
+                ).padStart(
+                    2,
+                    "0"
+                );
+
+
+            const day =
+                String(
+                    now.getDate()
+                ).padStart(
+                    2,
+                    "0"
+                );
+
+
+            const hours =
+                String(
+                    now.getHours()
+                ).padStart(
+                    2,
+                    "0"
+                );
+
+
+            const minutes =
+                String(
+                    now.getMinutes()
+                ).padStart(
+                    2,
+                    "0"
+                );
+
+
+            scheduledStart.min =
+                `${year}-${month}-${day}T${hours}:${minutes}`;
+
+        }
+
+
+        setMinimumScheduleDate();
+
+
+
+        /* =================================================
+           FORM VALIDATION
+        ================================================= */
+
+        if (sessionForm) {
+
+            sessionForm.addEventListener(
+                "submit",
+                function (event) {
+
+
+                    /* -------------------------------------
+                       TITLE
+                    ------------------------------------- */
+
+                    const titleInput =
+                        document.getElementById(
+                            "sessionTitle"
+                        );
+
+
+                    const title =
+                        titleInput
+                            ? titleInput.value.trim()
+                            : "";
+
+
+                    if (!title) {
+
+                        event.preventDefault();
+
+                        alert(
+                            "Please enter a session title."
+                        );
+
+                        if (titleInput) {
+                            titleInput.focus();
+                        }
+
+                        return;
+
+                    }
+
+
+
+                    /* -------------------------------------
+                       PLAYLIST
+                    ------------------------------------- */
+
+                    if (
+                        playlistSelect &&
+                        !playlistSelect.value
+                    ) {
+
+                        event.preventDefault();
+
+                        alert(
+                            "Please select a playlist."
+                        );
+
+                        playlistSelect.focus();
+
+                        return;
+
+                    }
+
+
+
+                    /* -------------------------------------
+                       RTMP URL
+                    ------------------------------------- */
+
+                    const rtmpValue =
+                        youtubeRtmpUrl
+                            ? youtubeRtmpUrl.value.trim()
+                            : "";
+
+
+                    if (!rtmpValue) {
+
+                        event.preventDefault();
+
+                        alert(
+                            "Please enter the RTMP URL."
+                        );
+
+                        if (youtubeRtmpUrl) {
+                            youtubeRtmpUrl.focus();
+                        }
+
+                        return;
+
+                    }
+
+
+                    /*
+                     * RTMP / RTMPS validation.
+                     */
+
+                    if (
+                        !rtmpValue.startsWith(
+                            "rtmp://"
+                        ) &&
+                        !rtmpValue.startsWith(
+                            "rtmps://"
+                        )
+                    ) {
+
+                        event.preventDefault();
+
+                        alert(
+                            "RTMP URL must start with rtmp:// or rtmps://."
+                        );
+
+                        if (youtubeRtmpUrl) {
+                            youtubeRtmpUrl.focus();
+                        }
+
+                        return;
+
+                    }
+
+
+
+                    /* -------------------------------------
+                       STREAM KEY
+                    ------------------------------------- */
+
+                    const streamKeyValue =
+                        youtubeStreamKey
+                            ? youtubeStreamKey.value.trim()
+                            : "";
+
+
+                    if (!streamKeyValue) {
+
+                        event.preventDefault();
+
+                        alert(
+                            "Please enter the YouTube stream key."
+                        );
+
+                        if (youtubeStreamKey) {
+                            youtubeStreamKey.focus();
+                        }
+
+                        return;
+
+                    }
+
+
+
+                    /* -------------------------------------
+                       YOUTUBE URL
+                       OPTIONAL
+                    ------------------------------------- */
+
+                    const youtubeUrl =
+                        document.getElementById(
+                            "youtubeUrl"
+                        );
+
+
+                    const youtubeValue =
+                        youtubeUrl
+                            ? youtubeUrl.value.trim()
+                            : "";
+
+
+                    if (youtubeValue) {
+
+                        try {
+
+                            const parsedUrl =
+                                new URL(
+                                    youtubeValue
+                                );
+
+
+                            if (
+                                parsedUrl.protocol !==
+                                    "http:" &&
+                                parsedUrl.protocol !==
+                                    "https:"
+                            ) {
+
+                                throw new Error(
+                                    "Invalid protocol"
+                                );
+
+                            }
+
+                        }
+                        catch (error) {
+
+                            event.preventDefault();
+
+                            alert(
+                                "Please enter a valid YouTube URL."
+                            );
+
+                            if (youtubeUrl) {
+                                youtubeUrl.focus();
+                            }
+
+                            return;
+
+                        }
+
+                    }
+
+
+
+                    /* -------------------------------------
+                       SCHEDULE
+                    ------------------------------------- */
+
+                    if (
+                        startScheduled &&
+                        startScheduled.checked
+                    ) {
+
+
+                        if (
+                            !scheduledStart ||
+                            !scheduledStart.value
+                        ) {
+
+                            event.preventDefault();
+
+                            alert(
+                                "Please select a scheduled start time."
+                            );
+
+                            if (scheduledStart) {
+                                scheduledStart.focus();
+                            }
+
+                            return;
+
+                        }
+
+
+                        const selectedDate =
+                            new Date(
+                                scheduledStart.value
+                            );
+
+
+                        const now =
+                            new Date();
+
+
+                        if (
+                            isNaN(
+                                selectedDate.getTime()
+                            )
+                        ) {
+
+                            event.preventDefault();
+
+                            alert(
+                                "Please enter a valid scheduled start time."
+                            );
+
+                            scheduledStart.focus();
+
+                            return;
+
+                        }
+
+
+                        if (
+                            selectedDate <= now
+                        ) {
+
+                            event.preventDefault();
+
+                            alert(
+                                "Scheduled time must be in the future."
+                            );
+
+                            scheduledStart.focus();
+
+                            return;
+
+                        }
+
+                    }
+
+
+
+                    /* -------------------------------------
+                       DISABLE BUTTON
+                    ------------------------------------- */
+
+                    if (saveButton) {
+
+                        saveButton.disabled =
+                            true;
+
+
+                        saveButton.innerHTML =
+
+                            '<span class="spinner-border spinner-border-sm"></span>' +
+                            '<span>Saving...</span>';
+
+                    }
+
+                }
+            );
+
+        }
+
+
+    }
+
+);
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,2393 @@
+{% extends "streaming/base.html" %}
+
+{% block title %}
+    {{ playlist.name }} | Stream Studio
+{% endblock %}
+
+{% block page_title %}
+    Playlist Details
+{% endblock %}
+
+{% block page_subtitle %}
+    Manage videos and playback order
+{% endblock %}
+
+
+{% block extra_css %}
+
+<style>
+
+    /* =====================================================
+       PAGE
+    ====================================================== */
+
+    .playlist-detail-page {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+
+    /* =====================================================
+       TOP BAR
+    ====================================================== */
+
+    .detail-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 9px 13px;
+        border: 1px solid #e2e8f0;
+        background: #ffffff;
+        border-radius: 9px;
+        color: #475569;
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .back-btn:hover {
+        background: #f8fafc;
+        color: #111827;
+    }
+
+    .top-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        height: 38px;
+        padding: 0 13px;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        background: #ffffff;
+        color: #475569;
+        font-size: 11px;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .action-btn:hover {
+        background: #f8fafc;
+        color: #111827;
+    }
+
+    .action-btn.primary {
+        background: #111827;
+        border-color: #111827;
+        color: #ffffff;
+    }
+
+    .action-btn.primary:hover {
+        background: #1f2937;
+        color: #ffffff;
+    }
+
+    .action-btn.danger:hover {
+        color: #dc2626;
+        border-color: #fecaca;
+        background: #fef2f2;
+    }
+
+
+    /* =====================================================
+       HEADER CARD
+    ====================================================== */
+
+    .playlist-header-card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        overflow: hidden;
+        margin-bottom: 20px;
+    }
+
+    .playlist-header-content {
+        padding: 22px;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 25px;
+    }
+
+    .playlist-main-info {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .playlist-title {
+        color: #0f172a;
+        font-size: 24px;
+        font-weight: 700;
+        margin: 0 0 7px;
+        word-break: break-word;
+    }
+
+    .playlist-description {
+        color: #64748b;
+        font-size: 12px;
+        line-height: 1.6;
+        margin-bottom: 14px;
+        white-space: pre-line;
+    }
+
+    .playlist-meta {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .meta-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 6px 9px;
+        border-radius: 20px;
+        font-size: 10px;
+        font-weight: 600;
+    }
+
+    .meta-badge.mode {
+        background: #eff6ff;
+        color: #1d4ed8;
+    }
+
+    .meta-badge.repeat {
+        background: #f5f3ff;
+        color: #6d28d9;
+    }
+
+    .meta-badge.public {
+        background: #ecfdf5;
+        color: #047857;
+    }
+
+    .meta-badge.private {
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+    .meta-badge.active {
+        background: #ecfdf5;
+        color: #047857;
+    }
+
+    .meta-badge.inactive {
+        background: #fef2f2;
+        color: #b91c1c;
+    }
+
+
+    /* =====================================================
+       PLAYLIST STATS
+    ====================================================== */
+
+    .playlist-stats {
+        min-width: 260px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 9px;
+    }
+
+    .stat-box {
+        padding: 11px;
+        background: #f8fafc;
+        border-radius: 9px;
+    }
+
+    .stat-label {
+        color: #94a3b8;
+        font-size: 9px;
+        margin-bottom: 4px;
+    }
+
+    .stat-value {
+        color: #334155;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+
+    /* =====================================================
+       CONTENT GRID
+    ====================================================== */
+
+    .playlist-content-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 330px;
+        gap: 20px;
+        align-items: start;
+    }
+
+
+    /* =====================================================
+       CARD
+    ====================================================== */
+
+    .content-card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        overflow: hidden;
+        margin-bottom: 18px;
+    }
+
+    .content-card:last-child {
+        margin-bottom: 0;
+    }
+
+    .content-card-header {
+        padding: 16px 18px;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .content-card-header h3 {
+        margin: 0;
+        color: #111827;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .content-card-header p {
+        margin: 3px 0 0;
+        color: #94a3b8;
+        font-size: 10px;
+    }
+
+    .content-card-body {
+        padding: 18px;
+    }
+
+
+    /* =====================================================
+       VIDEO LIST
+    ====================================================== */
+
+    .playlist-video-list {
+        display: flex;
+        flex-direction: column;
+        gap: 9px;
+    }
+
+    .playlist-video-item {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 10px;
+        border: 1px solid #e2e8f0;
+        border-radius: 11px;
+        background: #ffffff;
+        transition:
+            border-color 0.15s,
+            background 0.15s,
+            box-shadow 0.15s;
+    }
+
+    .playlist-video-item:hover {
+        border-color: #cbd5e1;
+        background: #f8fafc;
+    }
+
+    .playlist-video-item.dragging {
+        opacity: 0.45;
+    }
+
+    .drag-handle {
+        width: 22px;
+        color: #94a3b8;
+        font-size: 16px;
+        cursor: grab;
+        flex-shrink: 0;
+    }
+
+    .drag-handle:active {
+        cursor: grabbing;
+    }
+
+    .video-order {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        background: #f1f5f9;
+        color: #475569;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    .playlist-video-thumbnail {
+        width: 110px;
+        height: 62px;
+        border-radius: 8px;
+        overflow: hidden;
+        background: #0f172a;
+        flex-shrink: 0;
+    }
+
+    .playlist-video-thumbnail img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .playlist-video-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #64748b;
+        font-size: 20px;
+    }
+
+    .playlist-video-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .playlist-video-title {
+        color: #334155;
+        font-size: 12px;
+        font-weight: 700;
+        margin-bottom: 5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .playlist-video-meta {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 7px;
+        color: #94a3b8;
+        font-size: 9px;
+    }
+
+    .playlist-video-meta span {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .video-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 7px;
+        border-radius: 15px;
+        font-size: 9px;
+        font-weight: 600;
+    }
+
+    .video-status.ready {
+        background: #ecfdf5;
+        color: #047857;
+    }
+
+    .video-status.processing {
+        background: #fffbeb;
+        color: #b45309;
+    }
+
+    .video-status.failed {
+        background: #fef2f2;
+        color: #b91c1c;
+    }
+
+    .video-status.other {
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+    .video-actions {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        flex-shrink: 0;
+    }
+
+    /* =====================================================
+       DIRECT POSITION CONTROL
+    ====================================================== */
+
+    .position-control {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        flex-shrink: 0;
+        padding-left: 4px;
+    }
+
+    .position-input {
+        width: 52px;
+        height: 31px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        background: #ffffff;
+        color: #334155;
+        text-align: center;
+        font-size: 10px;
+        font-weight: 700;
+        outline: none;
+    }
+
+    .position-input:focus {
+        border-color: #94a3b8;
+        box-shadow: 0 0 0 3px rgba(148,163,184,0.12);
+    }
+
+    .position-move-btn {
+        width: 31px;
+        height: 31px;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        background: #ffffff;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    .position-move-btn:hover {
+        background: #f8fafc;
+        color: #111827;
+        border-color: #cbd5e1;
+    }
+
+    .position-label {
+        color: #94a3b8;
+        font-size: 9px;
+        white-space: nowrap;
+    }
+
+    @media (max-width: 600px) {
+        .position-control {
+            width: 100%;
+            padding-left: 0;
+            margin-top: 4px;
+        }
+
+        .position-input {
+            flex: 1;
+            width: auto;
+        }
+
+        .position-move-btn {
+            flex-shrink: 0;
+        }
+
+        .playlist-video-item {
+            flex-wrap: wrap;
+        }
+
+        .playlist-video-info {
+            min-width: calc(100% - 145px);
+        }
+
+        .video-actions {
+            margin-left: auto;
+        }
+    }
+
+    .video-action {
+        width: 31px;
+        height: 31px;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        background: #ffffff;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .video-action:hover {
+        background: #f8fafc;
+        color: #111827;
+    }
+
+    .video-action.remove:hover {
+        color: #dc2626;
+        background: #fef2f2;
+        border-color: #fecaca;
+    }
+
+
+    /* =====================================================
+       EMPTY STATE
+    ====================================================== */
+
+    .empty-videos {
+        padding: 55px 20px;
+        text-align: center;
+    }
+
+    .empty-videos-icon {
+        width: 65px;
+        height: 65px;
+        margin: 0 auto 14px;
+        border-radius: 17px;
+        background: #f1f5f9;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 27px;
+    }
+
+    .empty-videos h3 {
+        margin: 0 0 6px;
+        color: #334155;
+        font-size: 16px;
+    }
+
+    .empty-videos p {
+        color: #94a3b8;
+        font-size: 11px;
+        margin: 0 0 17px;
+    }
+
+
+    /* =====================================================
+       ADD VIDEO BUTTON
+    ====================================================== */
+
+    .add-video-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        height: 37px;
+        padding: 0 13px;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        background: #ffffff;
+        color: #475569;
+        font-size: 11px;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .add-video-btn:hover {
+        background: #f8fafc;
+        color: #111827;
+    }
+
+
+    /* =====================================================
+       SAVE ORDER
+    ====================================================== */
+
+    .save-order-area {
+        display: none;
+        margin-top: 13px;
+        padding: 12px;
+        border-radius: 9px;
+        background: #eff6ff;
+        border: 1px solid #dbeafe;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .save-order-area.show {
+        display: flex;
+    }
+
+    .save-order-text {
+        color: #1e40af;
+        font-size: 10px;
+    }
+
+    .save-order-btn {
+        height: 34px;
+        padding: 0 12px;
+        border: 0;
+        border-radius: 7px;
+        background: #1d4ed8;
+        color: #ffffff;
+        font-size: 10px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+
+    /* =====================================================
+       SIDE INFO
+    ====================================================== */
+
+    .info-row {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 15px;
+        padding: 10px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .info-row:first-child {
+        padding-top: 0;
+    }
+
+    .info-row:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .info-label {
+        color: #94a3b8;
+        font-size: 10px;
+    }
+
+    .info-value {
+        color: #334155;
+        font-size: 10px;
+        font-weight: 600;
+        text-align: right;
+    }
+
+
+    /* =====================================================
+       MODE CARD
+    ====================================================== */
+
+    .mode-box {
+        padding: 14px;
+        border-radius: 11px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+    }
+
+    .mode-box-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        background: #ffffff;
+        color: #475569;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 10px;
+        font-size: 17px;
+    }
+
+    .mode-box-title {
+        color: #334155;
+        font-size: 12px;
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+
+    .mode-box-text {
+        color: #94a3b8;
+        font-size: 10px;
+        line-height: 1.5;
+    }
+
+
+    /* =====================================================
+       STREAM CARD
+    ====================================================== */
+
+    .stream-card {
+        background:
+            linear-gradient(
+                135deg,
+                #0f172a,
+                #1e293b
+            );
+        color: #ffffff;
+        border-radius: 14px;
+        padding: 17px;
+    }
+
+    .stream-card-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: rgba(255,255,255,0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 11px;
+        font-size: 17px;
+    }
+
+    .stream-card-title {
+        font-size: 14px;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+    .stream-card-text {
+        color: #94a3b8;
+        font-size: 10px;
+        line-height: 1.6;
+        margin-bottom: 14px;
+    }
+
+    .start-stream-btn {
+        width: 100%;
+        height: 40px;
+        border: 0;
+        border-radius: 8px;
+        background: #ffffff;
+        color: #111827;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        font-size: 11px;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .start-stream-btn:hover {
+        background: #f1f5f9;
+        color: #111827;
+    }
+
+
+    /* =====================================================
+       RESPONSIVE
+    ====================================================== */
+
+    @media (max-width: 991px) {
+
+        .playlist-content-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .playlist-stats {
+            min-width: 230px;
+        }
+
+    }
+
+
+    @media (max-width: 700px) {
+
+        .playlist-header-content {
+            flex-direction: column;
+        }
+
+        .playlist-stats {
+            width: 100%;
+            min-width: 0;
+        }
+
+    }
+
+
+    @media (max-width: 600px) {
+
+        .detail-topbar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .top-actions {
+            width: 100%;
+        }
+
+        .action-btn {
+            flex: 1;
+        }
+
+        .playlist-title {
+            font-size: 19px;
+        }
+
+        .playlist-video-thumbnail {
+            width: 80px;
+            height: 48px;
+        }
+
+        .video-actions {
+            flex-direction: column;
+        }
+
+        .save-order-area {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .save-order-btn {
+            width: 100%;
+        }
+
+    }
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="playlist-detail-page">
+
+
+    <!-- =====================================================
+         TOP BAR
+    ====================================================== -->
+
+    <div class="detail-topbar">
+
+
+        <a
+            href="{% url 'streaming:playlist_list' %}"
+            class="back-btn"
+        >
+
+            <i class="bi bi-arrow-left"></i>
+
+            Back to Playlists
+
+        </a>
+
+
+        <div class="top-actions">
+
+
+            <a
+                href="{% url 'streaming:playlist_edit' playlist.pk %}"
+                class="action-btn"
+            >
+
+                <i class="bi bi-pencil"></i>
+
+                Edit Playlist
+
+            </a>
+
+
+            {% if video_count %}
+
+                <a
+                    href="{% url 'streaming:session_create' %}"
+                    class="action-btn primary"
+                >
+
+                    <i class="bi bi-broadcast"></i>
+
+                    Start Stream
+
+                </a>
+
+            {% endif %}
+
+
+        </div>
+
+
+    </div>
+
+
+    <!-- =====================================================
+         PLAYLIST HEADER
+    ====================================================== -->
+
+    <div class="playlist-header-card">
+
+
+        <div class="playlist-header-content">
+
+
+            <div class="playlist-main-info">
+
+
+                <h1 class="playlist-title">
+
+                    {{ playlist.name }}
+
+                </h1>
+
+
+                {% if playlist.description %}
+
+                    <div class="playlist-description">
+
+                        {{ playlist.description }}
+
+                    </div>
+
+                {% endif %}
+
+
+                <div class="playlist-meta">
+
+
+                    {% if playlist.mode == "repeat" %}
+
+                        <span class="meta-badge repeat">
+
+                            <i class="bi bi-arrow-repeat"></i>
+
+                            Repeat
+
+                        </span>
+
+                    {% else %}
+
+                        <span class="meta-badge mode">
+
+                            <i class="bi bi-list-ol"></i>
+
+                            One by One
+
+                        </span>
+
+                    {% endif %}
+
+
+                    {% if playlist.is_public %}
+
+                        <span class="meta-badge public">
+
+                            <i class="bi bi-globe2"></i>
+
+                            Public
+
+                        </span>
+
+                    {% else %}
+
+                        <span class="meta-badge private">
+
+                            <i class="bi bi-lock"></i>
+
+                            Private
+
+                        </span>
+
+                    {% endif %}
+
+
+                    {% if playlist.is_active %}
+
+                        <span class="meta-badge active">
+
+                            <i class="bi bi-check-circle"></i>
+
+                            Active
+
+                        </span>
+
+                    {% else %}
+
+                        <span class="meta-badge inactive">
+
+                            <i class="bi bi-pause-circle"></i>
+
+                            Disabled
+
+                        </span>
+
+                    {% endif %}
+
+
+                </div>
+
+
+            </div>
+
+
+            <!-- =============================================
+                 STATS
+            ============================================== -->
+
+            <div class="playlist-stats">
+
+
+                <div class="stat-box">
+
+                    <div class="stat-label">
+                        Videos
+                    </div>
+
+                    <div class="stat-value">
+
+                        {{ video_count|default:0 }}
+
+                    </div>
+
+                </div>
+
+
+                <div class="stat-box">
+
+                    <div class="stat-label">
+                        Duration
+                    </div>
+
+                    <div class="stat-value"
+                         id="totalDuration">
+
+                        Calculating...
+
+                    </div>
+
+                </div>
+
+
+                <div class="stat-box">
+
+                    <div class="stat-label">
+                        Created
+                    </div>
+
+                    <div class="stat-value">
+
+                        {{ playlist.created_at|date:"d M Y" }}
+
+                    </div>
+
+                </div>
+
+
+                <div class="stat-box">
+
+                    <div class="stat-label">
+                        Repeat
+                    </div>
+
+                    <div class="stat-value">
+
+                        {% if playlist.mode == "repeat" %}
+
+                            {% if playlist.repeat_count %}
+
+                                {{ playlist.repeat_count }}×
+                            
+                            {% else %}
+
+                                ∞
+
+                            {% endif %}
+
+                        {% else %}
+
+                            Off
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+    <!-- =====================================================
+         CONTENT
+    ====================================================== -->
+
+    <div class="playlist-content-grid">
+
+
+        <!-- =================================================
+             LEFT
+        ================================================== -->
+
+        <div>
+
+
+            <div class="content-card">
+
+
+                <div class="content-card-header">
+
+
+                    <div>
+
+                        <h3>
+                            Playlist Videos
+                        </h3>
+
+                        <p>
+                            Drag videos or enter a position number to change playback order.
+                        </p>
+
+                    </div>
+
+
+                    <a
+                        href="{% url 'streaming:video_list' %}"
+                        class="add-video-btn"
+                    >
+
+                        <i class="bi bi-plus-lg"></i>
+
+                        Add Video
+
+                    </a>
+
+
+                </div>
+
+
+                <div class="content-card-body">
+
+
+                    {% if playlist_items %}
+
+
+                        <div
+                            class="playlist-video-list"
+                            id="playlistVideoList"
+                        >
+
+
+                            {% for playlist_video in playlist_items %}
+
+                                <div
+                                    class="playlist-video-item"
+                                    draggable="true"
+                                    data-id="{{ playlist_video.pk }}"
+                                    data-video-id="{{ playlist_video.video.pk }}"
+                                >
+
+
+                                    <!-- DRAG -->
+
+                                    <div class="drag-handle">
+
+                                        <i class="bi bi-grip-vertical"></i>
+
+                                    </div>
+
+
+                                    <!-- ORDER -->
+
+                                    <div class="video-order">
+
+                                        {{ forloop.counter }}
+
+                                    </div>
+
+
+                                    <!-- THUMBNAIL -->
+
+                                    <div class="playlist-video-thumbnail">
+
+
+                                        {% if playlist_video.video.thumbnail %}
+
+                                            <img
+                                                src="{{ playlist_video.video.thumbnail.url }}"
+                                                alt="{{ playlist_video.video.title }}"
+                                                loading="lazy"
+                                            >
+
+                                        {% else %}
+
+                                            <div
+                                                class="playlist-video-placeholder"
+                                            >
+
+                                                <i class="bi bi-play-fill"></i>
+
+                                            </div>
+
+                                        {% endif %}
+
+
+                                    </div>
+
+
+                                    <!-- INFO -->
+
+                                    <div class="playlist-video-info">
+
+
+                                        <div
+                                            class="playlist-video-title"
+                                            title="{{ playlist_video.video.title }}"
+                                        >
+
+                                            {{ playlist_video.video.title }}
+
+                                        </div>
+
+
+                                        <div class="playlist-video-meta">
+
+
+                                            <span>
+
+                                                <i class="bi bi-clock"></i>
+
+                                                {% if playlist_video.video.duration_minutes %}
+
+                                                    {{ playlist_video.video.duration_minutes|floatformat:1 }}
+                                                    min
+
+                                                {% else %}
+
+                                                    —
+
+                                                {% endif %}
+
+                                            </span>
+
+
+                                            {% if playlist_video.video.status == "ready" %}
+
+                                                <span class="video-status ready">
+
+                                                    <i class="bi bi-check-circle-fill"></i>
+
+                                                    Ready
+
+                                                </span>
+
+                                            {% elif playlist_video.video.status == "processing" %}
+
+                                                <span class="video-status processing">
+
+                                                    <i class="bi bi-hourglass-split"></i>
+
+                                                    Processing
+
+                                                </span>
+
+                                            {% elif playlist_video.video.status == "failed" %}
+
+                                                <span class="video-status failed">
+
+                                                    <i class="bi bi-exclamation-circle"></i>
+
+                                                    Failed
+
+                                                </span>
+
+                                            {% else %}
+
+                                                <span class="video-status other">
+
+                                                    {{ playlist_video.video.get_status_display }}
+
+                                                </span>
+
+                                            {% endif %}
+
+
+                                        </div>
+
+
+                                    </div>
+
+
+                                    <!-- ACTIONS -->
+
+                                    <div class="video-actions">
+
+
+                                        <a
+                                            href="{% url 'streaming:video_detail' playlist_video.video.pk %}"
+                                            class="video-action"
+                                            title="View video"
+                                        >
+
+                                            <i class="bi bi-eye"></i>
+
+                                        </a>
+
+
+                                        <button
+                                            type="button"
+                                            class="video-action remove"
+                                            title="Remove from playlist"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#removeVideoModal{{ playlist_video.pk }}"
+                                        >
+
+                                            <i class="bi bi-x-lg"></i>
+
+                                        </button>
+
+
+                                    </div>
+
+
+                                </div>
+
+
+                                <!-- =================================
+                                     REMOVE MODAL
+                                ================================== -->
+
+                                <div
+                                    class="modal fade"
+                                    id="removeVideoModal{{ playlist_video.pk }}"
+                                    tabindex="-1"
+                                    aria-hidden="true"
+                                >
+
+                                    <div
+                                        class="modal-dialog modal-dialog-centered"
+                                    >
+
+                                        <div class="modal-content border-0 shadow">
+
+                                            <div class="modal-body text-center p-4">
+
+
+                                                <div
+                                                    style="
+                                                        width:52px;
+                                                        height:52px;
+                                                        border-radius:14px;
+                                                        background:#fef2f2;
+                                                        color:#dc2626;
+                                                        display:flex;
+                                                        align-items:center;
+                                                        justify-content:center;
+                                                        margin:0 auto 15px;
+                                                        font-size:22px;
+                                                    "
+                                                >
+
+                                                    <i class="bi bi-x-circle"></i>
+
+                                                </div>
+
+
+                                                <h5 class="fw-bold mb-2">
+
+                                                    Remove Video?
+
+                                                </h5>
+
+
+                                                <p class="text-muted small mb-4">
+
+                                                    Remove
+
+                                                    <strong>
+                                                        "{{ playlist_video.video.title }}"
+                                                    </strong>
+
+                                                    from this playlist?
+
+                                                    <br>
+
+                                                    The original video will not be deleted.
+
+                                                </p>
+
+
+                                                <div
+                                                    class="d-flex justify-content-center gap-2"
+                                                >
+
+
+                                                    <button
+                                                        type="button"
+                                                        class="btn btn-light"
+                                                        data-bs-dismiss="modal"
+                                                    >
+
+                                                        Cancel
+
+                                                    </button>
+
+
+                                                    <form
+                                                        method="post"
+                                                        action="{% url 'streaming:playlist_remove_video' playlist.pk playlist_video.pk %}"
+                                                    >
+
+                                                        {% csrf_token %}
+
+
+                                                        <button
+                                                            type="submit"
+                                                            class="btn btn-danger"
+                                                        >
+
+                                                            <i class="bi bi-x-lg me-1"></i>
+
+                                                            Remove
+
+                                                        </button>
+
+                                                    </form>
+
+
+                                                </div>
+
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+
+                            {% endfor %}
+
+
+                        </div>
+
+
+                        <!-- =====================================
+                             SAVE ORDER
+                        ====================================== -->
+
+                        <div
+                            class="save-order-area"
+                            id="saveOrderArea"
+                        >
+
+                            <div class="save-order-text">
+
+                                <i class="bi bi-info-circle me-1"></i>
+
+                                You changed the playback order. Save the new order below.
+
+                            </div>
+
+
+                            <button
+                                type="button"
+                                class="save-order-btn"
+                                id="saveOrderBtn"
+                            >
+
+                                Save New Order
+
+                            </button>
+
+                        </div>
+
+
+                    {% else %}
+
+
+                        <div class="empty-videos">
+
+
+                            <div class="empty-videos-icon">
+
+                                <i class="bi bi-collection-play"></i>
+
+                            </div>
+
+
+                            <h3>
+                                No videos in this playlist
+                            </h3>
+
+
+                            <p>
+                                Add videos to create your playback queue.
+                            </p>
+
+
+                            <a
+                                href="{% url 'streaming:video_list' %}"
+                                class="add-video-btn"
+                            >
+
+                                <i class="bi bi-plus-lg"></i>
+
+                                Add Video
+
+                            </a>
+
+
+                        </div>
+
+
+                    {% endif %}
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+        <!-- =================================================
+             RIGHT
+        ================================================== -->
+
+        <div>
+
+
+            <!-- =============================================
+                 PLAYBACK MODE
+            ============================================== -->
+
+            <div class="content-card">
+
+                <div class="content-card-header">
+
+                    <div>
+
+                        <h3>
+                            Playback Mode
+                        </h3>
+
+                    </div>
+
+                </div>
+
+
+                <div class="content-card-body">
+
+
+                    <div class="mode-box">
+
+
+                        <div class="mode-box-icon">
+
+
+                            {% if playlist.mode == "repeat" %}
+
+                                <i class="bi bi-arrow-repeat"></i>
+
+                            {% else %}
+
+                                <i class="bi bi-list-ol"></i>
+
+                            {% endif %}
+
+
+                        </div>
+
+
+                        <div class="mode-box-title">
+
+
+                            {% if playlist.mode == "repeat" %}
+
+                                Repeat Playlist
+
+                            {% else %}
+
+                                One by One
+
+                            {% endif %}
+
+
+                        </div>
+
+
+                        <div class="mode-box-text">
+
+
+                            {% if playlist.mode == "repeat" %}
+
+                                Videos will continue playing from
+                                the beginning after reaching the
+                                end of the playlist.
+
+                            {% else %}
+
+                                Videos will play sequentially from
+                                the first video to the last video.
+
+                            {% endif %}
+
+
+                        </div>
+
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+            <!-- =============================================
+                 PLAYLIST INFORMATION
+            ============================================== -->
+
+            <div class="content-card">
+
+                <div class="content-card-header">
+
+                    <h3>
+                        Playlist Information
+                    </h3>
+
+                </div>
+
+
+                <div class="content-card-body">
+
+
+                    <div class="info-row">
+
+                        <span class="info-label">
+                            Name
+                        </span>
+
+                        <span class="info-value">
+                            {{ playlist.name }}
+                        </span>
+
+                    </div>
+
+
+                    <div class="info-row">
+
+                        <span class="info-label">
+                            Videos
+                        </span>
+
+                        <span class="info-value">
+                            {{ video_count|default:0 }}
+                        </span>
+
+                    </div>
+
+
+                    <div class="info-row">
+
+                        <span class="info-label">
+                            Video Gap
+                        </span>
+
+                        <span class="info-value">
+
+                            {% if playlist.gap_seconds %}
+
+                                {{ playlist.gap_seconds }} sec
+
+                            {% else %}
+
+                                No Gap
+
+                            {% endif %}
+
+                        </span>
+
+                    </div>
+
+
+                    <div class="info-row">
+
+                        <span class="info-label">
+                            Auto Start
+                        </span>
+
+                        <span class="info-value">
+
+                            {% if playlist.auto_start %}
+
+                                Yes
+
+                            {% else %}
+
+                                No
+
+                            {% endif %}
+
+                        </span>
+
+                    </div>
+
+
+                    <div class="info-row">
+
+                        <span class="info-label">
+                            Created
+                        </span>
+
+                        <span class="info-value">
+
+                            {{ playlist.created_at|date:"d M Y" }}
+
+                        </span>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+            <!-- =============================================
+                 STREAM
+            ============================================== -->
+
+            {% if video_count and playlist.is_active %}
+
+                <div class="content-card">
+
+                    <div class="content-card-body">
+
+
+                        <div class="stream-card">
+
+
+                            <div class="stream-card-icon">
+
+                                <i class="bi bi-broadcast"></i>
+
+                            </div>
+
+
+                            <div class="stream-card-title">
+
+                                Ready to Stream
+
+                            </div>
+
+
+                            <div class="stream-card-text">
+
+                                This playlist contains
+                                {{ video_count|default:0 }}
+                                video{{ video_count|pluralize }}
+                                and is ready for a streaming session.
+
+                            </div>
+
+
+                            <a
+                                href="{% url 'streaming:session_create' %}"
+                                class="start-stream-btn"
+                            >
+
+                                <i class="bi bi-broadcast-pin"></i>
+
+                                Create Streaming Session
+
+                            </a>
+
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+            {% endif %}
+
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script>
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+
+        /* =================================================
+           ELEMENTS
+        ================================================== */
+
+        const list =
+            document.getElementById(
+                "playlistVideoList"
+            );
+
+        const saveOrderArea =
+            document.getElementById(
+                "saveOrderArea"
+            );
+
+        const saveOrderBtn =
+            document.getElementById(
+                "saveOrderBtn"
+            );
+
+        const totalDuration =
+            document.getElementById(
+                "totalDuration"
+            );
+
+
+        if (!list) {
+            return;
+        }
+
+
+        let draggedItem = null;
+
+        let originalOrder =
+            getCurrentOrder();
+
+
+        /* =================================================
+           CURRENT ORDER
+        ================================================== */
+
+        function getCurrentOrder() {
+
+            return Array
+                .from(
+                    list.querySelectorAll(
+                        ".playlist-video-item"
+                    )
+                )
+                .map(
+                    function (item) {
+
+                        return item.dataset.id;
+
+                    }
+                );
+
+        }
+
+
+        /* =================================================
+           UPDATE NUMBERS
+        ================================================== */
+
+        function updateNumbers() {
+
+            const items =
+                list.querySelectorAll(
+                    ".playlist-video-item"
+                );
+
+
+            items.forEach(
+                function (
+                    item,
+                    index
+                ) {
+
+
+                    const number =
+                        item.querySelector(
+                            ".video-order"
+                        );
+
+
+                    if (number) {
+
+                        number.textContent =
+                            index + 1;
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        /* =================================================
+           CHECK ORDER CHANGED
+        ================================================== */
+
+        function checkOrderChanged() {
+
+            const currentOrder =
+                getCurrentOrder();
+
+
+            const changed =
+                currentOrder.join(",") !==
+                originalOrder.join(",");
+
+
+            if (saveOrderArea) {
+
+                if (changed) {
+
+                    saveOrderArea.classList.add(
+                        "show"
+                    );
+
+                }
+                else {
+
+                    saveOrderArea.classList.remove(
+                        "show"
+                    );
+
+                }
+
+            }
+
+        }
+
+
+        /* =================================================
+           DRAG START
+        ================================================== */
+
+        list.addEventListener(
+            "dragstart",
+            function (event) {
+
+
+                const item =
+                    event.target.closest(
+                        ".playlist-video-item"
+                    );
+
+
+                if (!item) {
+                    return;
+                }
+
+
+                draggedItem =
+                    item;
+
+
+                item.classList.add(
+                    "dragging"
+                );
+
+
+                event.dataTransfer.effectAllowed =
+                    "move";
+
+
+                event.dataTransfer.setData(
+                    "text/plain",
+                    item.dataset.id
+                );
+
+            }
+        );
+
+
+        /* =================================================
+           DRAG END
+        ================================================== */
+
+        list.addEventListener(
+            "dragend",
+            function (event) {
+
+
+                const item =
+                    event.target.closest(
+                        ".playlist-video-item"
+                    );
+
+
+                if (item) {
+
+                    item.classList.remove(
+                        "dragging"
+                    );
+
+                }
+
+
+                draggedItem = null;
+
+
+                updateNumbers();
+
+                checkOrderChanged();
+
+            }
+        );
+
+
+        /* =================================================
+           DRAG OVER
+        ================================================== */
+
+        list.addEventListener(
+            "dragover",
+            function (event) {
+
+
+                event.preventDefault();
+
+
+                if (!draggedItem) {
+                    return;
+                }
+
+
+                const target =
+                    event.target.closest(
+                        ".playlist-video-item"
+                    );
+
+
+                if (
+                    !target ||
+                    target === draggedItem
+                ) {
+
+                    return;
+
+                }
+
+
+                const rect =
+                    target.getBoundingClientRect();
+
+
+                const middle =
+                    rect.top +
+                    rect.height / 2;
+
+
+                if (
+                    event.clientY < middle
+                ) {
+
+                    list.insertBefore(
+                        draggedItem,
+                        target
+                    );
+
+                }
+                else {
+
+                    list.insertBefore(
+                        draggedItem,
+                        target.nextSibling
+                    );
+
+                }
+
+
+                updateNumbers();
+
+                checkOrderChanged();
+
+            }
+        );
+
+
+        /* =================================================
+           SAVE ORDER
+        ================================================== */
+
+        if (saveOrderBtn) {
+            saveOrderBtn.addEventListener(
+                "click",
+                async function () {
+
+                    const order = getCurrentOrder();
+
+                    if (!order.length) {
+                        return;
+                    }
+
+                    saveOrderBtn.disabled = true;
+                    saveOrderBtn.innerHTML =
+                        '<span class="spinner-border spinner-border-sm me-1"></span>' +
+                        'Saving...';
+
+                    const csrf = document.querySelector(
+                        "[name=csrfmiddlewaretoken]"
+                    );
+
+                    if (!csrf) {
+                        alert("CSRF token not found.");
+                        saveOrderBtn.disabled = false;
+                        saveOrderBtn.innerHTML = "Save New Order";
+                        return;
+                    }
+
+                    try {
+
+                        /*
+                         * Submit one item at a time.
+                         *
+                         * This matches the Django endpoint:
+                         *
+                         * item_id
+                         * position
+                         *
+                         * We do it sequentially so every move is
+                         * applied against the latest playlist order.
+                         */
+
+                        for (let index = 0; index < order.length; index++) {
+
+                            const formData = new FormData();
+
+                            formData.append(
+                                "csrfmiddlewaretoken",
+                                csrf.value
+                            );
+
+                            formData.append(
+                                "item_id",
+                                order[index]
+                            );
+
+                            formData.append(
+                                "position",
+                                index + 1
+                            );
+
+                            const response = await fetch(
+                                "{% url 'streaming:playlist_reorder' playlist.pk %}",
+                                {
+                                    method: "POST",
+                                    body: formData,
+                                    headers: {
+                                        "X-Requested-With": "XMLHttpRequest"
+                                    }
+                                }
+                            );
+
+                            if (!response.ok) {
+                                throw new Error(
+                                    "Failed to save playlist order."
+                                );
+                            }
+                        }
+
+                        window.location.reload();
+
+                    }
+                    catch (error) {
+
+                        console.error(error);
+
+                        alert(
+                            "Could not save the new playlist order."
+                        );
+
+                        saveOrderBtn.disabled = false;
+
+                        saveOrderBtn.innerHTML =
+                            "Save New Order";
+                    }
+                }
+            );
+        }
+
+
+        /* =================================================
+           DIRECT POSITION FORM
+        ================================================== */
+
+        window.validatePositionForm = function (form) {
+
+            const input =
+                form.querySelector(
+                    ".position-input"
+                );
+
+            if (!input) {
+                return true;
+            }
+
+            const position =
+                parseInt(
+                    input.value,
+                    10
+                );
+
+            const maxPosition =
+                parseInt(
+                    input.max,
+                    10
+                );
+
+            if (
+                Number.isNaN(position) ||
+                position < 1
+            ) {
+
+                alert(
+                    "Position must be at least 1."
+                );
+
+                input.focus();
+
+                return false;
+            }
+
+            if (
+                !Number.isNaN(maxPosition) &&
+                position > maxPosition
+            ) {
+
+                alert(
+                    "Position cannot be greater than " +
+                    maxPosition +
+                    "."
+                );
+
+                input.focus();
+
+                return false;
+            }
+
+            return true;
+        };
+
+
+        /* =================================================
+           TOTAL DURATION
+        ================================================== */
+
+        function calculateTotalDuration() {
+
+
+            const videos =
+                list.querySelectorAll(
+                    ".playlist-video-item"
+                );
+
+
+            let totalMinutes = 0;
+
+
+            videos.forEach(
+                function (item) {
+
+
+                    const durationElement =
+                        item.querySelector(
+                            ".playlist-video-meta span"
+                        );
+
+
+                    if (!durationElement) {
+                        return;
+                    }
+
+
+                    const text =
+                        durationElement.textContent
+                            .trim();
+
+
+                    const match =
+                        text.match(
+                            /([\d.]+)\s*min/
+                        );
+
+
+                    if (match) {
+
+                        totalMinutes +=
+                            parseFloat(
+                                match[1]
+                            );
+
+                    }
+
+                }
+            );
+
+
+            if (!totalDuration) {
+                return;
+            }
+
+
+            if (totalMinutes <= 0) {
+
+                totalDuration.textContent =
+                    "—";
+
+                return;
+
+            }
+
+
+            const hours =
+                Math.floor(
+                    totalMinutes / 60
+                );
+
+
+            const minutes =
+                Math.round(
+                    totalMinutes % 60
+                );
+
+
+            if (hours > 0) {
+
+                totalDuration.textContent =
+                    hours +
+                    "h " +
+                    minutes +
+                    "m";
+
+            }
+            else {
+
+                totalDuration.textContent =
+                    Math.round(
+                        totalMinutes
+                    ) +
+                    " min";
+
+            }
+
+        }
+
+
+        calculateTotalDuration();
+
+    }
+
+);
+
+</script>
+
+{% endblock %}

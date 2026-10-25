@@ -1,0 +1,1510 @@
+{% extends "streaming/base.html" %}
+{% load static %}
+
+{% block title %}
+    Dashboard | Stream Studio
+{% endblock %}
+
+{% block page_title %}
+    Dashboard
+{% endblock %}
+
+{% block page_subtitle %}
+    Manage your videos, playlists and streaming sessions
+{% endblock %}
+
+
+{% block extra_css %}
+
+<style>
+
+/* =========================================================
+   DASHBOARD
+========================================================= */
+
+.dashboard-container {
+    width: 100%;
+}
+
+
+/* =========================================================
+   WELCOME
+========================================================= */
+
+.welcome-card {
+    background: linear-gradient(
+        135deg,
+        #111827 0%,
+        #1f2937 100%
+    );
+
+    border-radius: 18px;
+    padding: 28px;
+
+    color: #ffffff;
+
+    margin-bottom: 24px;
+
+    position: relative;
+    overflow: hidden;
+}
+
+.welcome-card::after {
+    content: "";
+
+    position: absolute;
+
+    width: 260px;
+    height: 260px;
+
+    border-radius: 50%;
+
+    background: rgba(255,255,255,0.04);
+
+    right: -80px;
+    top: -100px;
+}
+
+.welcome-content {
+    position: relative;
+    z-index: 2;
+}
+
+.welcome-title {
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.welcome-text {
+    color: #cbd5e1;
+    margin: 0;
+    font-size: 14px;
+    max-width: 700px;
+}
+
+
+/* =========================================================
+   QUICK ACTIONS
+========================================================= */
+
+.quick-actions {
+    display: flex;
+
+    gap: 10px;
+
+    margin-top: 20px;
+
+    flex-wrap: wrap;
+}
+
+.quick-action {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 10px 16px;
+
+    border-radius: 10px;
+
+    text-decoration: none;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    transition: 0.2s;
+}
+
+.quick-action-primary {
+    background: #ffffff;
+    color: #111827;
+}
+
+.quick-action-primary:hover {
+    background: #f1f5f9;
+    color: #111827;
+    transform: translateY(-1px);
+}
+
+.quick-action-secondary {
+    background: rgba(
+        255,
+        255,
+        255,
+        0.10
+    );
+
+    color: #ffffff;
+
+    border: 1px solid rgba(
+        255,
+        255,
+        255,
+        0.12
+    );
+}
+
+.quick-action-secondary:hover {
+    background: rgba(
+        255,
+        255,
+        255,
+        0.16
+    );
+
+    color: #ffffff;
+}
+
+
+/* =========================================================
+   STAT CARDS
+========================================================= */
+
+.stat-card {
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 16px;
+
+    padding: 20px;
+
+    height: 100%;
+
+    transition: 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 10px 25px
+        rgba(15, 23, 42, 0.06);
+}
+
+.stat-top {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 18px;
+}
+
+.stat-icon {
+    width: 44px;
+    height: 44px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 12px;
+
+    background: #f1f5f9;
+
+    color: #334155;
+
+    font-size: 20px;
+}
+
+.stat-label {
+    color: #64748b;
+
+    font-size: 13px;
+
+    font-weight: 500;
+}
+
+.stat-value {
+    font-size: 28px;
+
+    font-weight: 700;
+
+    color: #0f172a;
+
+    line-height: 1;
+}
+
+.stat-footer {
+    margin-top: 8px;
+
+    color: #94a3b8;
+
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   SECTION CARD
+========================================================= */
+
+.dashboard-card {
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 16px;
+
+    overflow: hidden;
+}
+
+.dashboard-card-header {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    padding: 18px 20px;
+
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.dashboard-card-title {
+    margin: 0;
+
+    font-size: 16px;
+
+    font-weight: 700;
+
+    color: #111827;
+}
+
+.dashboard-card-link {
+    color: #64748b;
+
+    text-decoration: none;
+
+    font-size: 13px;
+
+    font-weight: 600;
+}
+
+.dashboard-card-link:hover {
+    color: #111827;
+}
+
+
+/* =========================================================
+   VIDEO LIST
+========================================================= */
+
+.video-item {
+    display: flex;
+
+    align-items: center;
+
+    gap: 14px;
+
+    padding: 14px 20px;
+
+    border-bottom: 1px solid #f1f5f9;
+
+    transition: 0.15s;
+}
+
+.video-item:last-child {
+    border-bottom: 0;
+}
+
+.video-item:hover {
+    background: #f8fafc;
+}
+
+.video-thumb {
+    width: 84px;
+
+    height: 52px;
+
+    border-radius: 8px;
+
+    overflow: hidden;
+
+    background: #e2e8f0;
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+}
+
+.video-thumb img {
+    width: 100%;
+
+    height: 100%;
+
+    object-fit: cover;
+}
+
+.video-thumb-icon {
+    color: #64748b;
+
+    font-size: 20px;
+}
+
+.video-info {
+    min-width: 0;
+
+    flex: 1;
+}
+
+.video-title {
+    color: #111827;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+}
+
+.video-date {
+    color: #94a3b8;
+
+    font-size: 12px;
+
+    margin-top: 3px;
+}
+
+.video-status {
+    flex-shrink: 0;
+}
+
+
+/* =========================================================
+   STATUS BADGES
+========================================================= */
+
+.status-badge {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 5px;
+
+    padding: 5px 9px;
+
+    border-radius: 20px;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    white-space: nowrap;
+}
+
+.status-ready {
+    background: #ecfdf5;
+
+    color: #047857;
+}
+
+.status-processing {
+    background: #fffbeb;
+
+    color: #b45309;
+}
+
+.status-failed {
+    background: #fef2f2;
+
+    color: #b91c1c;
+}
+
+.status-uploading {
+    background: #eff6ff;
+
+    color: #1d4ed8;
+}
+
+.status-live {
+    background: #fef2f2;
+
+    color: #dc2626;
+}
+
+.status-stopped {
+    background: #f1f5f9;
+
+    color: #475569;
+}
+
+.status-queued {
+    background: #eff6ff;
+
+    color: #1d4ed8;
+}
+
+.status-starting {
+    background: #fefce8;
+
+    color: #a16207;
+}
+
+.status-stopping {
+    background: #f1f5f9;
+
+    color: #475569;
+}
+
+
+/* =========================================================
+   VIDEO READY INDICATOR
+========================================================= */
+
+.ready-indicator {
+    margin-top: 5px;
+
+    font-size: 11px;
+
+    color: #047857;
+}
+
+.not-ready-indicator {
+    margin-top: 5px;
+
+    font-size: 11px;
+
+    color: #94a3b8;
+}
+
+
+/* =========================================================
+   PLAYLIST
+========================================================= */
+
+.playlist-item {
+    display: flex;
+
+    align-items: center;
+
+    gap: 14px;
+
+    padding: 14px 20px;
+
+    border-bottom: 1px solid #f1f5f9;
+
+    transition: 0.15s;
+}
+
+.playlist-item:last-child {
+    border-bottom: 0;
+}
+
+.playlist-item:hover {
+    background: #f8fafc;
+}
+
+.playlist-icon {
+    width: 42px;
+
+    height: 42px;
+
+    border-radius: 10px;
+
+    background: #f1f5f9;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    color: #475569;
+
+    font-size: 18px;
+
+    flex-shrink: 0;
+}
+
+.playlist-info {
+    flex: 1;
+
+    min-width: 0;
+}
+
+.playlist-name {
+    font-size: 14px;
+
+    font-weight: 600;
+
+    color: #111827;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+}
+
+.playlist-meta {
+    font-size: 12px;
+
+    color: #94a3b8;
+
+    margin-top: 3px;
+}
+
+
+/* =========================================================
+   STREAM
+========================================================= */
+
+.stream-item {
+    padding: 16px 20px;
+
+    border-bottom: 1px solid #f1f5f9;
+
+    transition: 0.15s;
+}
+
+.stream-item:last-child {
+    border-bottom: 0;
+}
+
+.stream-item:hover {
+    background: #f8fafc;
+}
+
+.stream-header {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 12px;
+
+    margin-bottom: 8px;
+}
+
+.stream-title {
+    font-size: 14px;
+
+    font-weight: 600;
+
+    color: #111827;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+}
+
+.stream-meta {
+    display: flex;
+
+    gap: 14px;
+
+    flex-wrap: wrap;
+
+    color: #94a3b8;
+
+    font-size: 12px;
+}
+
+.stream-meta span {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 5px;
+}
+
+
+/* =========================================================
+   LIVE DOT
+========================================================= */
+
+.live-dot {
+    width: 7px;
+
+    height: 7px;
+
+    border-radius: 50%;
+
+    background: #dc2626;
+
+    display: inline-block;
+
+    animation: livePulse 1.4s infinite;
+}
+
+@keyframes livePulse {
+
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.35;
+    }
+
+    100% {
+        opacity: 1;
+    }
+
+}
+
+
+/* =========================================================
+   EMPTY STATE
+========================================================= */
+
+.empty-state {
+    text-align: center;
+
+    padding: 35px 20px;
+
+    color: #94a3b8;
+}
+
+.empty-state-icon {
+    font-size: 35px;
+
+    margin-bottom: 10px;
+}
+
+.empty-state-title {
+    color: #475569;
+
+    font-weight: 600;
+
+    font-size: 14px;
+
+    margin-bottom: 5px;
+}
+
+.empty-state-text {
+    font-size: 12px;
+
+    margin-bottom: 15px;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 768px) {
+
+    .welcome-card {
+        padding: 22px;
+    }
+
+    .welcome-title {
+        font-size: 22px;
+    }
+
+    .stat-value {
+        font-size: 24px;
+    }
+
+    .video-item {
+        padding: 13px 15px;
+    }
+
+    .video-thumb {
+        width: 70px;
+        height: 45px;
+    }
+
+    .dashboard-card-header {
+        padding: 15px;
+    }
+
+    .video-status {
+        display: none;
+    }
+
+}
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="dashboard-container">
+
+
+    <!-- =====================================================
+         WELCOME
+    ====================================================== -->
+
+    <div class="welcome-card">
+
+        <div class="welcome-content">
+
+            <div class="welcome-title">
+
+                Welcome back,
+                {{ user.username }} 👋
+
+            </div>
+
+            <p class="welcome-text">
+
+                Upload videos, organize them into playlists,
+                and create streaming sessions for YouTube.
+
+            </p>
+
+
+            <div class="quick-actions">
+
+                <a
+                    href="{% url 'streaming:video_upload' %}"
+                    class="quick-action quick-action-primary"
+                >
+
+                    <i class="bi bi-cloud-arrow-up-fill"></i>
+
+                    Upload Video
+
+                </a>
+
+
+                <a
+                    href="{% url 'streaming:playlist_create' %}"
+                    class="quick-action quick-action-secondary"
+                >
+
+                    <i class="bi bi-plus-lg"></i>
+
+                    Create Playlist
+
+                </a>
+
+
+                <a
+                    href="{% url 'streaming:session_create' %}"
+                    class="quick-action quick-action-secondary"
+                >
+
+                    <i class="bi bi-broadcast"></i>
+
+                    Start Stream
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         STATISTICS
+    ====================================================== -->
+
+    <div class="row g-3 mb-4">
+
+
+        <!-- VIDEOS -->
+
+        <div class="col-6 col-xl-3">
+
+            <div class="stat-card">
+
+                <div class="stat-top">
+
+                    <div class="stat-label">
+                        Total Videos
+                    </div>
+
+                    <div class="stat-icon">
+                        <i class="bi bi-collection-play"></i>
+                    </div>
+
+                </div>
+
+                <div class="stat-value">
+                    {{ video_count|default:0 }}
+                </div>
+
+                <div class="stat-footer">
+                    Uploaded videos
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- PLAYLISTS -->
+
+        <div class="col-6 col-xl-3">
+
+            <div class="stat-card">
+
+                <div class="stat-top">
+
+                    <div class="stat-label">
+                        Playlists
+                    </div>
+
+                    <div class="stat-icon">
+                        <i class="bi bi-list-ul"></i>
+                    </div>
+
+                </div>
+
+                <div class="stat-value">
+                    {{ playlist_count|default:0 }}
+                </div>
+
+                <div class="stat-footer">
+                    Video collections
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- STREAMS -->
+
+        <div class="col-6 col-xl-3">
+
+            <div class="stat-card">
+
+                <div class="stat-top">
+
+                    <div class="stat-label">
+                        Streams
+                    </div>
+
+                    <div class="stat-icon">
+                        <i class="bi bi-broadcast-pin"></i>
+                    </div>
+
+                </div>
+
+                <div class="stat-value">
+                    {{ session_count|default:0 }}
+                </div>
+
+                <div class="stat-footer">
+                    Streaming sessions
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- YOUTUBE -->
+
+        <div class="col-6 col-xl-3">
+
+            <div class="stat-card">
+
+                <div class="stat-top">
+
+                    <div class="stat-label">
+                        YouTube
+                    </div>
+
+                    <div class="stat-icon">
+                        <i class="bi bi-youtube"></i>
+                    </div>
+
+                </div>
+
+                <div class="stat-value">
+                    {{ youtube_channel_count|default:0 }}
+                </div>
+
+                <div class="stat-footer">
+                    Connected channels
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         RECENT CONTENT
+    ====================================================== -->
+
+    <div class="row g-4">
+
+
+        <!-- =================================================
+             RECENT VIDEOS
+        ================================================== -->
+
+        <div class="col-xl-7">
+
+            <div class="dashboard-card">
+
+                <div class="dashboard-card-header">
+
+                    <h2 class="dashboard-card-title">
+                        Recent Videos
+                    </h2>
+
+                    <a
+                        href="{% url 'streaming:video_list' %}"
+                        class="dashboard-card-link"
+                    >
+
+                        View all
+
+                        <i class="bi bi-arrow-right ms-1"></i>
+
+                    </a>
+
+                </div>
+
+
+                {% if recent_videos %}
+
+                    {% for video in recent_videos %}
+
+                        <div class="video-item">
+
+
+                            <!-- THUMBNAIL -->
+
+                            <div class="video-thumb">
+
+                                {% if video.thumbnail %}
+
+                                    <img
+                                        src="{{ video.thumbnail.url }}"
+                                        alt="{{ video.title }}"
+                                    >
+
+                                {% else %}
+
+                                    <i class="bi bi-play-circle video-thumb-icon"></i>
+
+                                {% endif %}
+
+                            </div>
+
+
+                            <!-- INFORMATION -->
+
+                            <div class="video-info">
+
+                                <div class="video-title">
+
+                                    {{ video.title }}
+
+                                </div>
+
+                                <div class="video-date">
+
+                                    {{ video.created_at|date:"d M Y, h:i A" }}
+
+                                </div>
+
+
+                                <!-- STREAM AVAILABILITY -->
+
+                                {% if video.status == "ready" %}
+
+                                    <div class="ready-indicator">
+
+                                        <i class="bi bi-check-circle me-1"></i>
+
+                                        Ready for playlist
+
+                                    </div>
+
+                                {% else %}
+
+                                    <div class="not-ready-indicator">
+
+                                        <i class="bi bi-info-circle me-1"></i>
+
+                                        Available after processing
+
+                                    </div>
+
+                                {% endif %}
+
+                            </div>
+
+
+                            <!-- STATUS -->
+
+                            <div class="video-status">
+
+                                {% if video.status == "ready" %}
+
+                                    <span class="status-badge status-ready">
+
+                                        <i class="bi bi-check-circle"></i>
+
+                                        Ready
+
+                                    </span>
+
+
+                                {% elif video.status == "processing" %}
+
+                                    <span class="status-badge status-processing">
+
+                                        <i class="bi bi-arrow-repeat"></i>
+
+                                        Processing
+
+                                    </span>
+
+
+                                {% elif video.status == "failed" %}
+
+                                    <span class="status-badge status-failed">
+
+                                        <i class="bi bi-x-circle"></i>
+
+                                        Failed
+
+                                    </span>
+
+
+                                {% elif video.status == "uploading" %}
+
+                                    <span class="status-badge status-uploading">
+
+                                        <i class="bi bi-cloud-arrow-up"></i>
+
+                                        Uploading
+
+                                    </span>
+
+
+                                {% else %}
+
+                                    <span class="status-badge status-stopped">
+
+                                        {{ video.get_status_display }}
+
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+
+                        </div>
+
+                    {% endfor %}
+
+
+                {% else %}
+
+                    <div class="empty-state">
+
+                        <div class="empty-state-icon">
+
+                            <i class="bi bi-collection-play"></i>
+
+                        </div>
+
+                        <div class="empty-state-title">
+
+                            No videos yet
+
+                        </div>
+
+                        <div class="empty-state-text">
+
+                            Upload your first video to get started.
+
+                        </div>
+
+                        <a
+                            href="{% url 'streaming:video_upload' %}"
+                            class="btn btn-dark btn-sm"
+                        >
+
+                            <i class="bi bi-cloud-arrow-up me-1"></i>
+
+                            Upload Video
+
+                        </a>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             PLAYLISTS
+        ================================================== -->
+
+        <div class="col-xl-5">
+
+            <div class="dashboard-card">
+
+                <div class="dashboard-card-header">
+
+                    <h2 class="dashboard-card-title">
+                        Playlists
+                    </h2>
+
+                    <a
+                        href="{% url 'streaming:playlist_list' %}"
+                        class="dashboard-card-link"
+                    >
+
+                        View all
+
+                        <i class="bi bi-arrow-right ms-1"></i>
+
+                    </a>
+
+                </div>
+
+
+                {% if recent_playlists %}
+
+                    {% for playlist in recent_playlists %}
+
+                        <div class="playlist-item">
+
+
+                            <div class="playlist-icon">
+
+                                <i class="bi bi-music-note-list"></i>
+
+                            </div>
+
+
+                            <div class="playlist-info">
+
+                                <div class="playlist-name">
+
+                                    {{ playlist.name }}
+
+                                </div>
+
+                                <div class="playlist-meta">
+
+                                    {{ playlist.items.count }}
+                                    video{{ playlist.items.count|pluralize }}
+
+                                    ·
+
+                                    {{ playlist.get_play_mode_display }}
+
+                                </div>
+
+                            </div>
+
+
+                            <a
+                                href="{% url 'streaming:playlist_detail' playlist.pk %}"
+                                class="btn btn-sm btn-light"
+                            >
+
+                                <i class="bi bi-chevron-right"></i>
+
+                            </a>
+
+
+                        </div>
+
+                    {% endfor %}
+
+
+                {% else %}
+
+                    <div class="empty-state">
+
+                        <div class="empty-state-icon">
+
+                            <i class="bi bi-list-ul"></i>
+
+                        </div>
+
+                        <div class="empty-state-title">
+
+                            No playlists
+
+                        </div>
+
+                        <div class="empty-state-text">
+
+                            Create a playlist for your stream.
+
+                        </div>
+
+                        <a
+                            href="{% url 'streaming:playlist_create' %}"
+                            class="btn btn-dark btn-sm"
+                        >
+
+                            <i class="bi bi-plus-lg me-1"></i>
+
+                            Create Playlist
+
+                        </a>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             STREAMING SESSIONS
+        ================================================== -->
+
+        <div class="col-12">
+
+            <div class="dashboard-card">
+
+                <div class="dashboard-card-header">
+
+                    <h2 class="dashboard-card-title">
+
+                        Recent Streaming Sessions
+
+                    </h2>
+
+                    <a
+                        href="{% url 'streaming:session_list' %}"
+                        class="dashboard-card-link"
+                    >
+
+                        View all
+
+                        <i class="bi bi-arrow-right ms-1"></i>
+
+                    </a>
+
+                </div>
+
+
+                {% if recent_sessions %}
+
+                    {% for session in recent_sessions %}
+
+                        <div class="stream-item">
+
+                            <div class="stream-header">
+
+                                <div class="stream-title">
+
+                                    {{ session.title|default:"Untitled Stream" }}
+
+                                </div>
+
+
+                                <!-- STATUS -->
+
+                                {% if session.status == "live" %}
+
+                                    <span class="status-badge status-live">
+
+                                        <span class="live-dot"></span>
+
+                                        LIVE
+
+                                    </span>
+
+
+                                {% elif session.status == "queued" %}
+
+                                    <span class="status-badge status-queued">
+
+                                        <i class="bi bi-clock"></i>
+
+                                        Queued
+
+                                    </span>
+
+
+                                {% elif session.status == "starting" %}
+
+                                    <span class="status-badge status-starting">
+
+                                        <i class="bi bi-play-circle"></i>
+
+                                        Starting
+
+                                    </span>
+
+
+                                {% elif session.status == "stopping" %}
+
+                                    <span class="status-badge status-stopping">
+
+                                        <i class="bi bi-hourglass-split"></i>
+
+                                        Stopping
+
+                                    </span>
+
+
+                                {% elif session.status == "stopped" %}
+
+                                    <span class="status-badge status-stopped">
+
+                                        <i class="bi bi-stop-circle"></i>
+
+                                        Stopped
+
+                                    </span>
+
+
+                                {% elif session.status == "failed" %}
+
+                                    <span class="status-badge status-failed">
+
+                                        <i class="bi bi-x-circle"></i>
+
+                                        Failed
+
+                                    </span>
+
+
+                                {% else %}
+
+                                    <span class="status-badge status-stopped">
+
+                                        {{ session.get_status_display }}
+
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+
+                            <div class="stream-meta">
+
+
+                                {% if session.playlist %}
+
+                                    <span>
+
+                                        <i class="bi bi-list-ul"></i>
+
+                                        {{ session.playlist.name }}
+
+                                    </span>
+
+                                {% endif %}
+
+
+                                <span>
+
+                                    <i class="bi bi-arrow-repeat"></i>
+
+                                    {{ session.get_mode_display }}
+
+                                </span>
+
+
+                                {% if session.youtube_channel %}
+
+                                    <span>
+
+                                        <i class="bi bi-youtube"></i>
+
+                                        {{ session.youtube_channel.channel_title }}
+
+                                    </span>
+
+                                {% endif %}
+
+
+                                <span>
+
+                                    <i class="bi bi-calendar3"></i>
+
+                                    {{ session.created_at|date:"d M Y, h:i A" }}
+
+                                </span>
+
+
+                            </div>
+
+
+                        </div>
+
+                    {% endfor %}
+
+
+                {% else %}
+
+                    <div class="empty-state">
+
+                        <div class="empty-state-icon">
+
+                            <i class="bi bi-broadcast"></i>
+
+                        </div>
+
+                        <div class="empty-state-title">
+
+                            No streaming sessions
+
+                        </div>
+
+                        <div class="empty-state-text">
+
+                            Create your first streaming session
+                            to start broadcasting.
+
+                        </div>
+
+                        <a
+                            href="{% url 'streaming:session_create' %}"
+                            class="btn btn-dark btn-sm"
+                        >
+
+                            <i class="bi bi-broadcast me-1"></i>
+
+                            Create Stream
+
+                        </a>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,1531 @@
+{% extends "streaming/base.html" %}
+
+{% block title %}
+    {{ session.title|default:"Streaming Session" }} | Stream Studio
+{% endblock %}
+
+
+{% block page_title %}
+    Session Details
+{% endblock %}
+
+
+{% block page_subtitle %}
+    View and manage your streaming session
+{% endblock %}
+
+
+{% block extra_css %}
+
+<style>
+
+    /* =========================================================
+       PAGE
+    ========================================================= */
+
+    .session-page {
+        width: 100%;
+        max-width: 1250px;
+        margin: 0 auto;
+    }
+
+
+    /* =========================================================
+       HEADER
+    ========================================================= */
+
+    .session-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 20px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+    }
+
+    .session-header-left {
+        min-width: 0;
+    }
+
+    .session-title {
+        margin: 0;
+        font-size: 30px;
+        line-height: 1.2;
+        font-weight: 800;
+        color: #111827;
+        word-break: break-word;
+    }
+
+    .session-description {
+        margin-top: 8px;
+        color: #6b7280;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .session-header-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+
+    /* =========================================================
+       BUTTONS
+    ========================================================= */
+
+    .session-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+
+        min-height: 42px;
+        padding: 10px 16px;
+
+        border-radius: 10px;
+        border: 1px solid transparent;
+
+        text-decoration: none;
+
+        font-size: 14px;
+        font-weight: 700;
+
+        cursor: pointer;
+
+        transition:
+            transform .15s ease,
+            box-shadow .15s ease,
+            background .15s ease;
+    }
+
+    .session-btn:hover {
+        transform: translateY(-1px);
+    }
+
+    .session-btn-primary {
+        background: #2563eb;
+        color: white;
+    }
+
+    .session-btn-primary:hover {
+        background: #1d4ed8;
+        color: white;
+    }
+
+    .session-btn-success {
+        background: #16a34a;
+        color: white;
+    }
+
+    .session-btn-success:hover {
+        background: #15803d;
+        color: white;
+    }
+
+    .session-btn-danger {
+        background: #dc2626;
+        color: white;
+    }
+
+    .session-btn-danger:hover {
+        background: #b91c1c;
+        color: white;
+    }
+
+    .session-btn-secondary {
+        background: #f3f4f6;
+        color: #374151;
+        border-color: #e5e7eb;
+    }
+
+    .session-btn-secondary:hover {
+        background: #e5e7eb;
+        color: #111827;
+    }
+
+
+    /* =========================================================
+       CARDS
+    ========================================================= */
+
+    .session-card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+
+        padding: 22px;
+        margin-bottom: 20px;
+
+        box-shadow:
+            0 5px 20px rgba(15, 23, 42, .04);
+    }
+
+    .session-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        gap: 15px;
+
+        margin-bottom: 18px;
+    }
+
+    .session-card-title {
+        margin: 0;
+
+        font-size: 18px;
+        font-weight: 800;
+
+        color: #111827;
+    }
+
+    .session-card-subtitle {
+        margin-top: 4px;
+
+        color: #6b7280;
+        font-size: 13px;
+    }
+
+
+    /* =========================================================
+       STATUS
+    ========================================================= */
+
+    .session-status-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        gap: 20px;
+
+        flex-wrap: wrap;
+    }
+
+    .session-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+
+        padding: 9px 15px;
+
+        border-radius: 999px;
+
+        font-size: 13px;
+        font-weight: 800;
+
+        text-transform: uppercase;
+        letter-spacing: .03em;
+    }
+
+    .session-status-dot {
+        width: 9px;
+        height: 9px;
+
+        border-radius: 50%;
+
+        background: currentColor;
+    }
+
+    .session-status-live {
+        color: #15803d;
+        background: #dcfce7;
+    }
+
+    .session-status-active {
+        color: #15803d;
+        background: #dcfce7;
+    }
+
+    .session-status-starting {
+        color: #92400e;
+        background: #fef3c7;
+    }
+
+    .session-status-queued {
+        color: #92400e;
+        background: #fef3c7;
+    }
+
+    .session-status-stopping {
+        color: #c2410c;
+        background: #ffedd5;
+    }
+
+    .session-status-stopped {
+        color: #4b5563;
+        background: #f3f4f6;
+    }
+
+    .session-status-draft {
+        color: #4b5563;
+        background: #f3f4f6;
+    }
+
+    .session-status-failed {
+        color: #b91c1c;
+        background: #fee2e2;
+    }
+
+
+    /* =========================================================
+       GRID
+    ========================================================= */
+
+    .session-grid {
+        display: grid;
+
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+
+        gap: 20px;
+    }
+
+
+    /* =========================================================
+       INFORMATION ROWS
+    ========================================================= */
+
+    .session-info-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .session-info-row {
+        display: flex;
+
+        align-items: flex-start;
+        justify-content: space-between;
+
+        gap: 25px;
+
+        padding: 13px 0;
+
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .session-info-row:first-child {
+        padding-top: 0;
+    }
+
+    .session-info-row:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .session-info-label {
+        color: #6b7280;
+
+        font-size: 13px;
+        font-weight: 600;
+
+        flex-shrink: 0;
+    }
+
+    .session-info-value {
+        color: #111827;
+
+        font-size: 14px;
+        font-weight: 700;
+
+        text-align: right;
+
+        word-break: break-word;
+    }
+
+    .session-info-value a {
+        color: #2563eb;
+        text-decoration: none;
+    }
+
+    .session-info-value a:hover {
+        text-decoration: underline;
+    }
+
+
+    /* =========================================================
+       YOUTUBE
+    ========================================================= */
+
+    .youtube-card {
+        border-color: #fecaca;
+    }
+
+    .youtube-header-icon {
+        width: 38px;
+        height: 38px;
+
+        border-radius: 10px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        background: #fee2e2;
+        color: #dc2626;
+
+        font-size: 18px;
+        font-weight: 800;
+    }
+
+    .youtube-heading {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .youtube-box {
+        background: #fff7f7;
+
+        border: 1px solid #fecaca;
+
+        border-radius: 12px;
+
+        padding: 17px;
+    }
+
+    .youtube-url {
+        color: #dc2626;
+        word-break: break-all;
+    }
+
+    .stream-key-hidden {
+        letter-spacing: 2px;
+        color: #6b7280;
+    }
+
+
+    /* =========================================================
+       ERROR
+    ========================================================= */
+
+    .session-error {
+        background: #fff1f2;
+
+        border: 1px solid #fecaca;
+
+        border-radius: 12px;
+
+        padding: 16px;
+
+        color: #991b1b;
+
+        font-size: 14px;
+
+        line-height: 1.6;
+
+        white-space: pre-wrap;
+
+        word-break: break-word;
+    }
+
+
+    /* =========================================================
+       COMMAND
+    ========================================================= */
+
+    .ffmpeg-command {
+        margin: 0;
+
+        padding: 16px;
+
+        background: #111827;
+
+        color: #e5e7eb;
+
+        border-radius: 12px;
+
+        overflow-x: auto;
+
+        white-space: pre-wrap;
+
+        word-break: break-word;
+
+        font-size: 12px;
+
+        line-height: 1.6;
+
+        font-family:
+            Consolas,
+            Monaco,
+            "Courier New",
+            monospace;
+    }
+
+
+    /* =========================================================
+       EMPTY
+    ========================================================= */
+
+    .session-empty {
+        padding: 25px;
+
+        text-align: center;
+
+        color: #6b7280;
+    }
+
+
+    /* =========================================================
+       DANGER ZONE
+    ========================================================= */
+
+    .danger-card {
+        background: #fffafa;
+
+        border-color: #fecaca;
+    }
+
+    .danger-card .session-card-title {
+        color: #991b1b;
+    }
+
+
+    /* =========================================================
+       LIVE INDICATOR
+    ========================================================= */
+
+    .live-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+
+        color: #dc2626;
+
+        font-size: 13px;
+        font-weight: 800;
+    }
+
+    .live-indicator-dot {
+        width: 8px;
+        height: 8px;
+
+        background: #dc2626;
+
+        border-radius: 50%;
+
+        animation: livePulse 1.5s infinite;
+    }
+
+    @keyframes livePulse {
+
+        0% {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        50% {
+            opacity: .45;
+            transform: scale(.75);
+        }
+
+        100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+    }
+
+
+    /* =========================================================
+       RESPONSIVE
+    ========================================================= */
+
+    @media (max-width: 850px) {
+
+        .session-grid {
+            grid-template-columns: 1fr;
+        }
+
+    }
+
+
+    @media (max-width: 600px) {
+
+        .session-card {
+            padding: 17px;
+        }
+
+        .session-title {
+            font-size: 24px;
+        }
+
+        .session-header-actions {
+            width: 100%;
+        }
+
+        .session-header-actions .session-btn {
+            flex: 1;
+        }
+
+        .session-info-row {
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .session-info-value {
+            text-align: left;
+        }
+
+    }
+
+</style>
+
+{% endblock %}
+
+
+
+{% block content %}
+
+<div class="session-page">
+
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <div class="session-header">
+
+        <div class="session-header-left">
+
+            <h1 class="session-title">
+                {{ session.title|default:"Streaming Session" }}
+            </h1>
+
+            {% if session.description %}
+
+                <div class="session-description">
+                    {{ session.description }}
+                </div>
+
+            {% endif %}
+
+        </div>
+
+
+        <div class="session-header-actions">
+
+            <a
+                href="{% url 'streaming:session_list' %}"
+                class="session-btn session-btn-secondary"
+            >
+                ← Back to Sessions
+            </a>
+
+
+            {% if session.pk %}
+
+                <a
+                    href="{% url 'streaming:session_edit' session.pk %}"
+                    class="session-btn session-btn-primary"
+                >
+                    ✏ Edit Session
+                </a>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         STATUS CARD
+    ====================================================== -->
+
+    <div class="session-card">
+
+        <div class="session-status-wrapper">
+
+
+            <div>
+
+                <div
+                    class="
+                        session-status
+
+                        {% if session.status == 'live' %}
+                            session-status-live
+
+                        {% elif session.status == 'active' %}
+                            session-status-active
+
+                        {% elif session.status == 'starting' %}
+                            session-status-starting
+
+                        {% elif session.status == 'queued' %}
+                            session-status-queued
+
+                        {% elif session.status == 'stopping' %}
+                            session-status-stopping
+
+                        {% elif session.status == 'failed' %}
+                            session-status-failed
+
+                        {% elif session.status == 'draft' %}
+                            session-status-draft
+
+                        {% else %}
+                            session-status-stopped
+                        {% endif %}
+                    "
+                >
+
+                    <span class="session-status-dot"></span>
+
+                    {{ session.get_status_display|default:session.status|default:"Unknown" }}
+
+                </div>
+
+            </div>
+
+
+            {% if session.status == "live" or session.status == "active" %}
+
+                <div class="live-indicator">
+
+                    <span class="live-indicator-dot"></span>
+
+                    STREAMING LIVE
+
+                </div>
+
+            {% endif %}
+
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         BASIC INFORMATION
+    ====================================================== -->
+
+    <div class="session-grid">
+
+
+        <!-- SESSION INFORMATION -->
+
+        <div class="session-card">
+
+            <div class="session-card-header">
+
+                <div>
+
+                    <h2 class="session-card-title">
+                        Session Information
+                    </h2>
+
+                    <div class="session-card-subtitle">
+                        Basic configuration of this session
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="session-info-list">
+
+
+                <div class="session-info-row">
+
+                    <span class="session-info-label">
+                        Title
+                    </span>
+
+                    <span class="session-info-value">
+                        {{ session.title|default:"—" }}
+                    </span>
+
+                </div>
+
+
+                <div class="session-info-row">
+
+                    <span class="session-info-label">
+                        Owner
+                    </span>
+
+                    <span class="session-info-value">
+
+                        {% if session.owner %}
+                            {{ session.owner }}
+                        {% else %}
+                            —
+                        {% endif %}
+
+                    </span>
+
+                </div>
+
+
+                <div class="session-info-row">
+
+                    <span class="session-info-label">
+                        Mode
+                    </span>
+
+                    <span class="session-info-value">
+
+                        {% if session.mode %}
+                            {{ session.get_mode_display|default:session.mode }}
+                        {% else %}
+                            —
+                        {% endif %}
+
+                    </span>
+
+                </div>
+
+
+                <div class="session-info-row">
+
+                    <span class="session-info-label">
+                        Playlist
+                    </span>
+
+                    <span class="session-info-value">
+
+                        {% if session.playlist %}
+
+                            <a
+                                href="{% url 'streaming:playlist_detail' session.playlist.pk %}"
+                            >
+                                {{ session.playlist.name }}
+                            </a>
+
+                        {% else %}
+
+                            No playlist
+
+                        {% endif %}
+
+                    </span>
+
+                </div>
+
+
+                <div class="session-info-row">
+
+                    <span class="session-info-label">
+                        Current Position
+                    </span>
+
+                    <span class="session-info-value">
+
+                        {% if session.current_item_position != None %}
+                            {{ session.current_item_position }}
+                        {% else %}
+                            0
+                        {% endif %}
+
+                    </span>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+
+
+        <!-- AUTOMATION -->
+
+        <div class="session-card">
+
+            <div class="session-card-header">
+
+                <div>
+
+                    <h2 class="session-card-title">
+                        Schedule & Automation
+                    </h2>
+
+                    <div class="session-card-subtitle">
+                        Automatic streaming configuration
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="session-info-list">
+
+
+                <div class="session-info-row">
+
+                    <span class="session-info-label">
+                        Scheduled Start
+                    </span>
+
+                    <span class="session-info-value">
+
+                        {% if session.scheduled_start %}
+
+                            {{ session.scheduled_start|date:"d M Y, h:i A" }}
+
+                        {% else %}
+
+                            Not scheduled
+
+                        {% endif %}
+
+                    </span>
+
+                </div>
+
+
+                <div class="session-info-row">
+
+                    <span class="session-info-label">
+                        Auto Start
+                    </span>
+
+                    <span class="session-info-value">
+
+                        {% if session.auto_start %}
+                            Yes
+                        {% else %}
+                            No
+                        {% endif %}
+
+                    </span>
+
+                </div>
+
+
+                <div class="session-info-row">
+
+                    <span class="session-info-label">
+                        Auto Continue
+                    </span>
+
+                    <span class="session-info-value">
+
+                        {% if session.auto_continue %}
+                            Yes
+                        {% else %}
+                            No
+                        {% endif %}
+
+                    </span>
+
+                </div>
+
+
+                <div class="session-info-row">
+
+                    <span class="session-info-label">
+                        Auto Stop
+                    </span>
+
+                    <span class="session-info-value">
+
+                        {% if session.auto_stop %}
+                            Yes
+                        {% else %}
+                            No
+                        {% endif %}
+
+                    </span>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         YOUTUBE RTMP
+    ====================================================== -->
+
+    <div class="session-card youtube-card">
+
+        <div class="session-card-header">
+
+            <div class="youtube-heading">
+
+                <div class="youtube-header-icon">
+                    ▶
+                </div>
+
+                <div>
+
+                    <h2 class="session-card-title">
+                        YouTube RTMP
+                    </h2>
+
+                    <div class="session-card-subtitle">
+                        YouTube streaming destination
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="youtube-box">
+
+            <div class="session-info-list">
+
+
+                <!-- RTMP URL -->
+
+                <div class="session-info-row">
+
+                    <span class="session-info-label">
+                        RTMP URL
+                    </span>
+
+                    <span class="session-info-value youtube-url">
+
+                        {% if session.youtube_rtmp_url %}
+
+                            {{ session.youtube_rtmp_url }}
+
+                        {% else %}
+
+                            Not configured
+
+                        {% endif %}
+
+                    </span>
+
+                </div>
+
+
+                <!-- STREAM KEY -->
+
+                <div class="session-info-row">
+
+                    <span class="session-info-label">
+                        Stream Key
+                    </span>
+
+                    <span class="session-info-value stream-key-hidden">
+
+                        ***************
+
+                    </span>
+
+                </div>
+
+
+                <!-- PRIVACY -->
+
+                <div class="session-info-row">
+
+                    <span class="session-info-label">
+                        Privacy
+                    </span>
+
+                    <span class="session-info-value">
+
+                        {% if session.youtube_privacy %}
+
+                            {{ session.get_youtube_privacy_display|default:session.youtube_privacy }}
+
+                        {% else %}
+
+                            —
+
+                        {% endif %}
+
+                    </span>
+
+                </div>
+
+
+                <!-- BROADCAST ID -->
+
+                <div class="session-info-row">
+
+                    <span class="session-info-label">
+                        Broadcast ID
+                    </span>
+
+                    <span class="session-info-value">
+
+                        {{ session.youtube_broadcast_id|default:"—" }}
+
+                    </span>
+
+                </div>
+
+
+                <!-- VIDEO ID -->
+
+                <div class="session-info-row">
+
+                    <span class="session-info-label">
+                        YouTube Video ID
+                    </span>
+
+                    <span class="session-info-value">
+
+                        {{ session.youtube_video_id|default:"—" }}
+
+                    </span>
+
+                </div>
+
+
+                <!-- YOUTUBE URL -->
+
+                {% if session.youtube_url %}
+
+                    <div class="session-info-row">
+
+                        <span class="session-info-label">
+                            YouTube URL
+                        </span>
+
+                        <span class="session-info-value">
+
+                            <a
+                                href="{{ session.youtube_url }}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                Open YouTube Video
+                            </a>
+
+                        </span>
+
+                    </div>
+
+                {% endif %}
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         PLAYBACK
+    ====================================================== -->
+
+    <div class="session-grid">
+
+
+        <!-- PLAYBACK -->
+
+        <div class="session-card">
+
+            <div class="session-card-header">
+
+                <div>
+
+                    <h2 class="session-card-title">
+                        Playback
+                    </h2>
+
+                    <div class="session-card-subtitle">
+                        Current playlist playback information
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="session-info-list">
+
+
+                <div class="session-info-row">
+
+                    <span class="session-info-label">
+                        Current Position
+                    </span>
+
+                    <span class="session-info-value">
+
+                        {{ session.current_item_position|default:"0" }}
+
+                    </span>
+
+                </div>
+
+
+                <div class="session-info-row">
+
+                    <span class="session-info-label">
+                        Current Video Started
+                    </span>
+
+                    <span class="session-info-value">
+
+                        {% if session.current_video_started_at %}
+
+                            {{ session.current_video_started_at|date:"d M Y, h:i:s A" }}
+
+                        {% else %}
+
+                            —
+
+                        {% endif %}
+
+                    </span>
+
+                </div>
+
+
+                <div class="session-info-row">
+
+                    <span class="session-info-label">
+                        Current Video Ended
+                    </span>
+
+                    <span class="session-info-value">
+
+                        {% if session.current_video_ended_at %}
+
+                            {{ session.current_video_ended_at|date:"d M Y, h:i:s A" }}
+
+                        {% else %}
+
+                            —
+
+                        {% endif %}
+
+                    </span>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+
+
+        <!-- TIMING -->
+
+        <div class="session-card">
+
+            <div class="session-card-header">
+
+                <div>
+
+                    <h2 class="session-card-title">
+                        Session Timing
+                    </h2>
+
+                    <div class="session-card-subtitle">
+                        Start and stop information
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="session-info-list">
+
+
+                <div class="session-info-row">
+
+                    <span class="session-info-label">
+                        Started At
+                    </span>
+
+                    <span class="session-info-value">
+
+                        {% if session.started_at %}
+
+                            {{ session.started_at|date:"d M Y, h:i:s A" }}
+
+                        {% else %}
+
+                            —
+
+                        {% endif %}
+
+                    </span>
+
+                </div>
+
+
+                <div class="session-info-row">
+
+                    <span class="session-info-label">
+                        Ended At
+                    </span>
+
+                    <span class="session-info-value">
+
+                        {% if session.ended_at %}
+
+                            {{ session.ended_at|date:"d M Y, h:i:s A" }}
+
+                        {% else %}
+
+                            —
+
+                        {% endif %}
+
+                    </span>
+
+                </div>
+
+
+                <div class="session-info-row">
+
+                    <span class="session-info-label">
+                        Created At
+                    </span>
+
+                    <span class="session-info-value">
+
+                        {% if session.created_at %}
+
+                            {{ session.created_at|date:"d M Y, h:i A" }}
+
+                        {% else %}
+
+                            —
+
+                        {% endif %}
+
+                    </span>
+
+                </div>
+
+
+                <div class="session-info-row">
+
+                    <span class="session-info-label">
+                        Updated At
+                    </span>
+
+                    <span class="session-info-value">
+
+                        {% if session.updated_at %}
+
+                            {{ session.updated_at|date:"d M Y, h:i A" }}
+
+                        {% else %}
+
+                            —
+
+                        {% endif %}
+
+                    </span>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         FFMPEG
+    ====================================================== -->
+
+    <div class="session-card">
+
+        <div class="session-card-header">
+
+            <div>
+
+                <h2 class="session-card-title">
+                    FFmpeg
+                </h2>
+
+                <div class="session-card-subtitle">
+                    Streaming process information
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="session-info-list">
+
+
+            <div class="session-info-row">
+
+                <span class="session-info-label">
+                    FFmpeg PID
+                </span>
+
+                <span class="session-info-value">
+
+                    {% if session.ffmpeg_pid %}
+
+                        {{ session.ffmpeg_pid }}
+
+                    {% else %}
+
+                        Not running
+
+                    {% endif %}
+
+                </span>
+
+            </div>
+
+
+        </div>
+
+
+        {% if session.ffmpeg_command %}
+
+            <div style="margin-top:20px;">
+
+                <div
+                    class="session-info-label"
+                    style="margin-bottom:8px;"
+                >
+                    FFmpeg Command
+                </div>
+
+
+                <pre class="ffmpeg-command">{{ session.ffmpeg_command }}</pre>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+
+    <!-- =====================================================
+         ERROR
+    ====================================================== -->
+
+    {% if session.last_error %}
+
+        <div class="session-card">
+
+            <div class="session-card-header">
+
+                <div>
+
+                    <h2 class="session-card-title">
+                        Last Error
+                    </h2>
+
+                    <div class="session-card-subtitle">
+                        The latest error reported by the streaming process
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="session-error">
+                {{ session.last_error }}
+            </div>
+
+        </div>
+
+    {% endif %}
+
+
+
+    <!-- =====================================================
+         ACTIONS
+    ====================================================== -->
+
+    <div class="session-card danger-card">
+
+        <div class="session-card-header">
+
+            <div>
+
+                <h2 class="session-card-title">
+                    Session Actions
+                </h2>
+
+                <div class="session-card-subtitle">
+                    Start or stop the streaming process
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="session-header-actions">
+
+
+            {% if session.status == "draft" or session.status == "stopped" or session.status == "failed" %}
+
+                <form
+                    method="post"
+                    action="{% url 'streaming:session_start' session.pk %}"
+                    style="display:inline;"
+                >
+
+                    {% csrf_token %}
+
+                    <button
+                        type="submit"
+                        class="session-btn session-btn-success"
+                    >
+                        ▶ Start Streaming
+                    </button>
+
+                </form>
+
+            {% endif %}
+
+
+
+            {% if session.status == "live" or session.status == "active" or session.status == "starting" or session.status == "queued" or session.status == "stopping" %}
+
+                <form
+                    method="post"
+                    action="{% url 'streaming:session_stop' session.pk %}"
+                    style="display:inline;"
+                >
+
+                    {% csrf_token %}
+
+                    <button
+                        type="submit"
+                        class="session-btn session-btn-danger"
+                    >
+                        ■ Stop Streaming
+                    </button>
+
+                </form>
+
+            {% endif %}
+
+
+        </div>
+
+    </div>
+
+
+</div>
+
+{% endblock %}
